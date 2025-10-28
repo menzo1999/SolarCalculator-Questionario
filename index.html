@@ -844,29 +844,9 @@ button:disabled:hover {
     </div>
 </div>
 
-<!-- PAGINA 1: Introduzione -->
-<div id="page1" class="page active">
-    <div class="section">
-        <div class="section-intro">
-            <p style="font-size: 20px; color: #333; margin-bottom: 30px;">
-                <strong>Inizia la tua valutazione energetica</strong>
-            </p>
-            <p>
-                Scopri la soluzione fotovoltaica ideale per la tua abitazione o azienda.<br>
-                Analisi dettagliata di potenza consigliata, investimento richiesto e periodo di ammortamento.
-            </p>
-        </div>
-        <div class="page-navigation">
-            <button class="btn-primary btn-nav btn-next" onclick="goToPage(2)">
-                Inizia il Calcolo
-                <span style="font-size: 20px;">→</span>
-            </button>
-        </div>
-    </div>
-</div>
 
 <!-- PAGINA 2: Dati Tecnici -->
-<div id="page2" class="page">
+<div id="page2" class="page active">
     <div class="section">
         <h2>Dati Tecnici</h2>
         <form id="solarForm" class="form-grid">
@@ -1015,7 +995,7 @@ button:disabled:hover {
 
 <script>
 // Variabile per tracciare la pagina corrente
-let currentPage = 1;
+let currentPage = 2;
 
 // Funzione per navigare tra le pagine
 function goToPage(pageNumber) {
