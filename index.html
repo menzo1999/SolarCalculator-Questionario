@@ -1,2082 +1,1040 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solar Calculator – Bertuzzi Energy</title>
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: #ffffff;
-    color: #1a1a1a;
-    line-height: 1.6;
-    padding: 32px 16px;
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    touch-action: manipulation;
-    min-height: 100vh;
-}
-
-.container {
-    max-width: 880px;
-    margin: 0 auto;
-    padding: 0 16px;
-}
-
-/* Header principale */
-.main-header {
-    text-align: center;
-    margin-bottom: 40px;
-    padding: 0;
-    background: transparent;
-    border-radius: 0;
-    box-shadow: none;
-    position: relative;
-    overflow: visible;
-}
-
-.main-header::after {
-    display: none;
-}
-
-.logo-title {
-    font-size: 38px;
-    font-weight: 800;
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 12px;
-    letter-spacing: 0px;
-    position: relative;
-    z-index: 1;
-}
-
-.subtitle {
-    font-size: 14px;
-    color: #475569;
-    font-weight: 400;
-    max-width: 560px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-    line-height: 1.7;
-}
-
-/* Indicatore di progresso */
-.progress-indicator {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 40px;
-    gap: 12px;
-    background: #f8fafc;
-    padding: 24px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.08);
-    border: 1px solid #e0f2fe;
-}
-
-.progress-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.progress-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #e5e7eb;
-    color: #9ca3af;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    border: 2px solid transparent;
-}
-
-.progress-circle.active {
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
-    color: white;
-    transform: scale(1.1);
-    box-shadow: 0 3px 16px rgba(30, 64, 175, 0.4);
-}
-
-.progress-circle.completed {
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-    color: white;
-}
-
-.progress-step-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    transition: color 0.3s ease;
-}
-
-.progress-step.active .progress-step-label {
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.progress-step.completed .progress-step-label {
-    color: #1e40af;
-}
-
-.progress-line {
-    width: 64px;
-    height: 3px;
-    background: #e5e7eb;
-    border-radius: 2px;
-    transition: all 0.4s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.progress-line::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 0;
-    background: linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
-    transition: width 0.4s ease;
-}
-
-.progress-line.completed::before {
-    width: 100%;
-}
-
-/* Sezioni/Pagine */
-.page {
-    display: none;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.page.active {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-    animation: fadeInUp 0.5s ease;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.section {
-    padding: 40px 40px;
-    background: #ffffff;
-    border-radius: 10px;
-    border: 1px solid #e0f2fe;
-    box-shadow: 0 3px 16px rgba(30, 64, 175, 0.08);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
-}
-
-.section:hover {
-    box-shadow: 0 6px 24px rgba(30, 64, 175, 0.12);
-    transform: translateY(-2px);
-}
-
-/* Titoli sezioni */
-h2 {
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 28px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid #e0f2fe;
-    position: relative;
-    letter-spacing: -0.5px;
-}
-
-h2::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 64px;
-    height: 2px;
-    background: linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
-}
-
-.section-intro {
-    text-align: center;
-    font-size: 14px;
-    color: #475569;
-    margin-bottom: 36px;
-    line-height: 1.8;
-    padding: 20px;
-    background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
-    border-radius: 6px;
-    border-left: 3px solid #3b82f6;
-}
-
-/* Form */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 22px;
-    margin-top: 28px;
-}
-
-.form-field {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-label {
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 8px;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-input, select {
-    padding: 13px 14px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 13px;
-    font-family: inherit;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: #fafbfc;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    color: #2d3748;
-    font-weight: 500;
-}
-
-select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%232563eb' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 11px center;
-    padding-right: 36px;
-    cursor: pointer;
-}
-
-input:focus, select:focus {
-    outline: none;
-    border-color: #3b82f6;
-    background: #ffffff;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-input:hover, select:hover {
-    border-color: #60a5fa;
-    background: #ffffff;
-}
-
-/* Help link */
-.help-link {
-    margin-top: 10px;
-}
-
-.help-link span {
-    font-size: 13px;
-    color: #2563eb;
-    cursor: pointer;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
-    background: #eff6ff;
-    border-radius: 6px;
-    border: 1px solid #dbeafe;
-}
-
-.help-link span:hover {
-    color: #1e40af;
-    background: #dbeafe;
-    transform: translateX(3px);
-}
-
-
-
-/* Pulsanti */
-button {
-    padding: 18px 36px;
-    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    position: relative;
-    overflow: hidden;
-}
-
-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s ease;
-}
-
-button:hover::before {
-    left: 100%;
-}
-
-button:hover {
-    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(37, 99, 235, 0.4);
-}
-
-button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.3);
-}
-
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
-}
-
-button:disabled:hover {
-    transform: none;
-    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
-}
-
-.btn-full {
-    width: 100%;
-    grid-column: span 2;
-    margin-top: 10px;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
-}
-
-.btn-secondary {
-    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-}
-
-/* Navigazione pagine */
-.page-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 40px;
-    gap: 20px;
-    padding-top: 30px;
-    border-top: 2px solid #f0f0f0;
-}
-
-.btn-nav {
-    flex: 1;
-    max-width: 220px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.btn-back {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-}
-
-.btn-next {
-    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
-    margin-left: auto;
-}
-
-/* Risultati */
-.result-container {
-    background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
-    padding: 32px;
-    margin-top: 28px;
-    border-radius: 10px;
-    border: 2px solid #bfdbfe;
-    box-shadow: 0 3px 16px rgba(30, 64, 175, 0.1);
-}
-
-.result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 0;
-    border-bottom: 2px solid #dbeafe;
-    transition: all 0.3s ease;
-}
-
-.result-row:hover {
-    background: rgba(59, 130, 246, 0.05);
-    padding-left: 12px;
-    padding-right: 12px;
-    margin-left: -12px;
-    margin-right: -12px;
-    border-radius: 6px;
-}
-
-.result-row:last-child {
-    border-bottom: none;
-}
-
-.result-label {
-    font-weight: 600;
-    color: #475569;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-
-.result-value {
-    font-weight: 700;
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-size: 19px;
-    text-align: right;
-}
-
-.result-highlight {
-    background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 75%, #60a5fa 100%);
-    padding: 28px;
-    border-radius: 10px;
-    margin-top: 24px;
-    text-align: center;
-    box-shadow: 0 6px 24px rgba(30, 64, 175, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-.result-highlight::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
-    animation: shimmer 4s infinite;
-}
-
-@keyframes shimmer {
-    0%, 100% { transform: translate(-25%, -25%) rotate(0deg); }
-    50% { transform: translate(25%, 25%) rotate(180deg); }
-}
-
-.result-highlight .label {
-    font-size: 11px;
-    color: #e0f2fe;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 10px;
-    font-weight: 600;
-    position: relative;
-    z-index: 1;
-}
-
-.result-highlight .value {
-    font-size: 34px;
-    font-weight: 800;
-    color: #ffffff;
-    position: relative;
-    z-index: 1;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Responsive Mobile */
-@media (max-width: 768px) {
-    body {
-        padding: 15px 10px;
-    }
-    
-    .container {
-        max-width: 100%;
-        padding: 0 8px;
-    }
-    
-    .main-header {
-        margin-bottom: 25px;
-        padding-bottom: 15px;
-    }
-    
-    .logo-title {
-        font-size: 26px;
-        line-height: 1.2;
-    }
-    
-    .subtitle {
-        font-size: 14px;
-        padding: 0 5px;
-        line-height: 1.5;
-    }
-    
-    .progress-indicator {
-        margin-bottom: 25px;
-        gap: 8px;
-        padding: 18px 12px;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-    }
-    
-    .progress-circle {
-        width: 36px;
-        height: 36px;
-        font-size: 13px;
-        flex-shrink: 0;
-    }
-    
-    .progress-line {
-        width: 30px;
-        flex-shrink: 0;
-    }
-    
-    .progress-step-label {
-        font-size: 9px;
-        white-space: nowrap;
-    }
-    
-    .section {
-        padding: 25px 18px;
-        border-radius: 12px;
-    }
-    
-    .section-intro {
-        font-size: 15px;
-        margin-bottom: 25px;
-        padding: 18px;
-    }
-    
-    h2 {
-        font-size: 20px;
-        margin-bottom: 20px;
-        padding-bottom: 12px;
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-    
-    .form-field {
-        width: 100%;
-        grid-column: span 1 !important;
-    }
-    
-    label {
-        font-size: 12px;
-        margin-bottom: 8px;
-    }
-    
-    input, select {
-        padding: 16px 14px;
-        font-size: 16px;
-        width: 100%;
-        border-radius: 8px;
-    }
-    
-    select {
-        background-position: right 14px center;
-    }
-    
-    .help-link span {
-        font-size: 14px;
-        padding: 10px 14px;
-        display: block;
-        text-align: center;
-    }
-    
-    button {
-        padding: 16px 24px;
-        font-size: 14px;
-        width: 100%;
-        letter-spacing: 0.5px;
-    }
-    
-    .btn-full {
-        grid-column: span 1;
-        margin-top: 15px;
-    }
-    
-    .page-navigation {
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 30px;
-        padding-top: 25px;
-    }
-    
-    .btn-nav {
-        max-width: 100%;
-        width: 100%;
-    }
-    
-    .btn-next {
-        margin-left: 0;
-    }
-    
-    .result-container {
-        padding: 20px 16px;
-        margin-top: 20px;
-    }
-    
-    .result-row {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 14px 0;
-        gap: 6px;
-    }
-    
-    .result-label {
-        font-size: 11px;
-    }
-    
-    .result-value {
-        font-size: 18px;
-        text-align: left;
-    }
-    
-    .result-highlight {
-        padding: 22px 16px;
-        margin-top: 20px;
-    }
-    
-    .result-highlight .label {
-        font-size: 10px;
-        margin-bottom: 8px;
-    }
-    
-    .result-highlight .value {
-        font-size: 26px;
-    }
-}
-
-@media (max-width: 480px) {
-    body {
-        padding: 12px 8px;
-    }
-    
-    .logo-title {
-        font-size: 24px;
-    }
-    
-    .subtitle {
-        font-size: 13px;
-    }
-    
-    .progress-indicator {
-        padding: 15px 10px;
-        gap: 6px;
-    }
-    
-    .progress-circle {
-        width: 32px;
-        height: 32px;
-        font-size: 12px;
-    }
-    
-    .progress-step-label {
-        font-size: 8px;
-    }
-    
-    .progress-line {
-        width: 25px;
-    }
-    
-    .section {
-        padding: 20px 14px;
-    }
-    
-    .section-intro {
-        font-size: 14px;
-        padding: 15px;
-    }
-    
-    h2 {
-        font-size: 18px;
-    }
-    
-    input, select {
-        padding: 14px 12px;
-        font-size: 16px;
-    }
-    
-    button {
-        padding: 15px 20px;
-        font-size: 13px;
-    }
-    
-    .result-value {
-        font-size: 16px;
-    }
-    
-    .result-highlight .value {
-        font-size: 24px;
-    }
-}
-
-@media (max-width: 380px) {
-    .logo-title {
-        font-size: 22px;
-    }
-    
-    .subtitle {
-        font-size: 12px;
-        line-height: 1.4;
-    }
-    
-    .progress-circle {
-        width: 30px;
-        height: 30px;
-        font-size: 11px;
-    }
-    
-    .progress-line {
-        width: 20px;
-    }
-    
-    .section {
-        padding: 18px 12px;
-    }
-    
-    h2 {
-        font-size: 17px;
-    }
-    
-    input, select {
-        padding: 13px 11px;
-        font-size: 15px;
-    }
-    
-    button {
-        padding: 14px 18px;
-        font-size: 12px;
-    }
-    
-    .result-highlight .value {
-        font-size: 22px;
-    }
-}
-</style>
-</head>
-<body>
-
-<div class="container">
-
-<!-- HEADER -->
-<div class="main-header">
-    <h1 class="logo-title">Solar Calculator</h1>
-    <p class="subtitle">Strumento professionale per la stima del tuo impianto fotovoltaico. Calcola potenza, costi e risparmio energetico.</p>
-</div>
-
-<!-- INDICATORE DI PROGRESSO -->
-<div class="progress-indicator">
-    <div class="progress-step" id="step-1">
-        <div class="progress-circle active" id="progress-1">1</div>
-        <div class="progress-step-label">Inizio</div>
-    </div>
-    <div class="progress-line" id="line-1"></div>
-    <div class="progress-step" id="step-2">
-        <div class="progress-circle" id="progress-2">2</div>
-        <div class="progress-step-label">Dati</div>
-    </div>
-    <div class="progress-line" id="line-2"></div>
-    <div class="progress-step" id="step-3">
-        <div class="progress-circle" id="progress-3">3</div>
-        <div class="progress-step-label">Risultati</div>
-    </div>
-</div>
-
-
-<!-- PAGINA 2: Dati Tecnici -->
-<div id="page2" class="page active">
-    <div class="section">
-        <h2>Dati Tecnici</h2>
-        <form id="solarForm" class="form-grid">
-            <div class="form-field" style="grid-column: span 2;">
-                <label>Tipologia Cliente</label>
-                <select id="tipoCliente" required onchange="gestioneTipoCliente()">
-                    <option value="privato">Privato</option>
-                    <option value="azienda">Azienda</option>
-                </select>
-            </div>
-            
-            <div id="opzioneCampoFotovoltaico" style="grid-column: span 2; display: none;">
-                <div class="help-link">
-                    <span onclick="toggleCampo()">
-                        Vuoi installare l'impianto in un campo fotovoltaico?
-                    </span>
-                </div>
-                <div id="opzioneCampo" style="display: none; margin-top: 10px;">
-                    <select id="installazioneCampo" onchange="gestioneCampo()" style="font-size: 14px; padding: 14px 16px; border: 2px solid #e5e5e5; border-radius: 8px; width: 100%; background: #fafafa;">
-                        <option value="no">No, installazione su tetto</option>
-                        <option value="si">Sì, installazione su campo fotovoltaico</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-field" style="grid-column: span 2;">
-                <label>Area Geografica</label>
-                <select id="area" required onchange="aggiornaRegioni()">
-                    <option value="">Seleziona area</option>
-                    <option value="nord">Nord Italia (1200 kWh/kW)</option>
-                    <option value="centro">Centro Italia (1300 kWh/kW)</option>
-                    <option value="sud">Sud Italia (1500 kWh/kW)</option>
-                    <option value="isole">Isole (1500 kWh/kW)</option>
-                </select>
-            </div>
-            
-            <div class="form-field" style="grid-column: span 2;">
-                <label>Regione</label>
-                <select id="regione" required>
-                    <option value="">Seleziona prima l'area geografica</option>
-                </select>
-            </div>
-            
-            <div class="form-field" style="grid-column: span 2;" id="campoTipoFornitura">
-                <label>Tipo di Fornitura</label>
-                <select id="tipoFornitura" required>
-                    <option value="monofase">Monofase (230V)</option>
-                    <option value="trifase">Trifase (400V)</option>
-                </select>
-            </div>
-            
-            <div class="form-field" id="campoConsumo">
-                <label>Consumo Annuo (kWh)</label>
-                <input type="number" id="consumo" placeholder="es. 3500">
-                <div class="help-link" onclick="toggleStima()">
-                    <span>Non conosci esattamente il tuo consumo? Fai una stima</span>
-                </div>
-                <div id="stimaConsumo" style="display: none; margin-top: 10px;">
-                    <select id="stimaSelect" onchange="applicaStima()" style="font-size: 14px;">
-                        <option value="">Seleziona in base alle persone</option>
-                        <option value="2300">1 persona (≈ 2.300 kWh/anno)</option>
-                        <option value="3400">2 persone (≈ 3.400 kWh/anno)</option>
-                        <option value="4100">3 persone (≈ 4.100 kWh/anno)</option>
-                        <option value="4600">4 persone (≈ 4.600 kWh/anno)</option>
-                        <option value="5300">5 persone (≈ 5.300 kWh/anno)</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-field" id="campoSuperficie" style="display: none;">
-                <label>Superficie Campo Disponibile (m²)</label>
-                <input type="number" id="superficie" placeholder="es. 500">
-            </div>
-            
-            <div class="form-field" id="campoPiccoConsumo">
-                <label>Picco Consumo</label>
-                <select id="consumoPico">
-                    <option value="giorno">Prevalentemente diurno</option>
-                    <option value="notte">Prevalentemente serale/notturno</option>
-                </select>
-            </div>
-            
-            <div class="form-field" id="campoTipoTetto">
-                <label>Tipologia Tetto</label>
-                <select id="tipoTetto">
-                    <option value="inclinato">Inclinato</option>
-                    <option value="piatto">Piatto</option>
-                </select>
-            </div>
-            
-            <div class="form-field" id="campoEsposizione">
-                <label>Esposizione Tetto</label>
-                <select id="esposizione">
-                    <option value="sud">Sud (Ottimale)</option>
-                    <option value="est">Est</option>
-                    <option value="ovest">Ovest</option>
-                    <option value="nord">Nord</option>
-                </select>
-            </div>
-            
-            <div class="form-field" id="campoMaterialeTetto">
-                <label>Materiale Tetto</label>
-                <select id="materialeTetto">
-                    <option value="tegole">Tegole</option>
-                    <option value="lamiere">Lamiere metalliche</option>
-                    <option value="cemento">Cemento</option>
-                    <option value="altro">Altro</option>
-                </select>
-            </div>
-        </form>
-        
-        <div class="page-navigation">
-            <button class="btn-back btn-nav" onclick="goToPage(1)">
-                <span style="font-size: 20px;">←</span>
-                Indietro
-            </button>
-            <button class="btn-primary btn-nav btn-next" onclick="validateAndCalculate()">
-                Calcola Impianto
-                <span style="font-size: 20px;">→</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- PAGINA 3: Risultati -->
-<div id="page3" class="page">
-    <div class="section">
-        <h2>Risultati Simulazione</h2>
-        <div id="result" class="result-container">
-            <div id="risultatoTesto"></div>
-        </div>
-        <div class="page-navigation" style="margin-top: 30px;">
-            <button class="btn-back btn-nav" onclick="goToPage(2)">
-                <span style="font-size: 20px;">←</span>
-                Modifica Dati
-            </button>
-            <button class="btn-primary btn-nav btn-next" onclick="scaricaPreventivo()">
-                Scarica PDF
-                <span style="font-size: 20px;">📄</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-</div>
-
-<script>
-// Variabile per tracciare la pagina corrente
-let currentPage = 2;
-
-// Funzione per navigare tra le pagine
-function goToPage(pageNumber) {
-    // Nascondi pagina corrente
-    document.getElementById('page' + currentPage).classList.remove('active');
-    
-    // Mostra nuova pagina
-    currentPage = pageNumber;
-    document.getElementById('page' + currentPage).classList.add('active');
-    
-    // Aggiorna indicatore di progresso
-    updateProgress();
-    
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// Funzione per aggiornare l'indicatore di progresso
-function updateProgress() {
-    for (let i = 1; i <= 3; i++) {
-        const circle = document.getElementById('progress-' + i);
-        const line = document.getElementById('line-' + i);
-        const step = document.getElementById('step-' + i);
-        
-        if (i < currentPage) {
-            circle.classList.add('completed');
-            circle.classList.remove('active');
-            if (step) step.classList.add('completed');
-            if (line) line.classList.add('completed');
-        } else if (i === currentPage) {
-            circle.classList.add('active');
-            circle.classList.remove('completed');
-            if (step) {
-                step.classList.add('active');
-                step.classList.remove('completed');
-            }
-        } else {
-            circle.classList.remove('active', 'completed');
-            if (step) step.classList.remove('active', 'completed');
-            if (line) line.classList.remove('completed');
-        }
-    }
-}
-
-// Definizione regioni per area
-const regioniPerArea = {
-    nord: [
-        'Emilia-Romagna',
-        'Lombardia',
-        'Veneto',
-        'Piemonte',
-        'Liguria',
-        'Trentino-Alto Adige',
-        'Friuli-Venezia Giulia',
-        'Valle d\'Aosta'
-    ],
-    centro: [
-        'Toscana',
-        'Marche',
-        'Umbria',
-        'Lazio'
-    ],
-    sud: [
-        'Abruzzo',
-        'Molise',
-        'Campania',
-        'Puglia',
-        'Basilicata',
-        'Calabria'
-    ],
-    isole: [
-        'Sicilia',
-        'Sardegna'
-    ]
-};
-
-// Surplus di trasferta per regione
-const surplusTrasferta = {
-    'Emilia-Romagna': 0,
-    'Toscana': 5,
-    'Marche': 5,
-    'Veneto': 5,
-    'Lombardia': 5,
-    'Liguria': 8,
-    'Piemonte': 8,
-    'Trentino-Alto Adige': 8,
-    'Umbria': 8,
-    'Lazio': 8,
-    'Abruzzo': 10,
-    'Molise': 10,
-    'Campania': 10,
-    'Puglia': 10,
-    'Basilicata': 10,
-    'Calabria': 10,
-    'Sicilia': 10,
-    'Sardegna': 10,
-    'Friuli-Venezia Giulia': 10,
-    'Valle d\'Aosta': 10
-};
-
-function aggiornaRegioni() {
-    const area = document.getElementById('area').value;
-    const regioneSelect = document.getElementById('regione');
-    
-    regioneSelect.innerHTML = '<option value="">Seleziona regione</option>';
-    
-    if (area && regioniPerArea[area]) {
-        regioniPerArea[area].forEach(regione => {
-            const option = document.createElement('option');
-            option.value = regione;
-            option.textContent = regione;
-            regioneSelect.appendChild(option);
-        });
-    }
-}
-
-function toggleStima() {
-    const stimaDiv = document.getElementById('stimaConsumo');
-    stimaDiv.style.display = stimaDiv.style.display === 'none' ? 'block' : 'none';
-}
-
-function gestioneTipoCliente() {
-    const tipoCliente = document.getElementById('tipoCliente').value;
-    const helpLinkStima = document.querySelector('#campoConsumo .help-link');
-    const stimaDiv = document.getElementById('stimaConsumo');
-    const opzioneCampoFotovoltaico = document.getElementById('opzioneCampoFotovoltaico');
-    
-    if (tipoCliente === 'azienda') {
-        if (helpLinkStima) helpLinkStima.style.display = 'none';
-        if (stimaDiv) stimaDiv.style.display = 'none';
-        if (opzioneCampoFotovoltaico) opzioneCampoFotovoltaico.style.display = 'block';
-    } else {
-        if (helpLinkStima) helpLinkStima.style.display = 'block';
-        if (opzioneCampoFotovoltaico) opzioneCampoFotovoltaico.style.display = 'none';
-        const opzioneCampo = document.getElementById('opzioneCampo');
-        const installazioneCampo = document.getElementById('installazioneCampo');
-        if (opzioneCampo) opzioneCampo.style.display = 'none';
-        if (installazioneCampo) {
-            installazioneCampo.value = 'no';
-            gestioneCampo();
-        }
-    }
-}
-
-function toggleCampo() {
-    const campoDiv = document.getElementById('opzioneCampo');
-    campoDiv.style.display = campoDiv.style.display === 'none' ? 'block' : 'none';
-}
-
-function gestioneCampo() {
-    const installazioneCampo = document.getElementById('installazioneCampo').value;
-    const campiTetto = ['campoTipoTetto', 'campoEsposizione', 'campoMaterialeTetto'];
-    const campiConsumo = ['campoConsumo', 'campoPiccoConsumo'];
-    const campoSuperficie = document.getElementById('campoSuperficie');
-    const inputSuperficie = document.getElementById('superficie');
-    const campoTipoFornitura = document.getElementById('campoTipoFornitura');
-    const tipoFornituraSelect = document.getElementById('tipoFornitura');
-    
-    if (installazioneCampo === 'si') {
-        campiTetto.forEach(campo => {
-            document.getElementById(campo).style.display = 'none';
-        });
-        campiConsumo.forEach(campo => {
-            document.getElementById(campo).style.display = 'none';
-        });
-        if (campoTipoFornitura) campoTipoFornitura.style.display = 'none';
-        if (tipoFornituraSelect) tipoFornituraSelect.value = 'trifase';
-        campoSuperficie.style.display = 'flex';
-        inputSuperficie.setAttribute('required', 'required');
-        document.getElementById('tipoTetto').value = 'inclinato';
-        document.getElementById('esposizione').value = 'sud';
-        document.getElementById('consumo').removeAttribute('required');
-    } else {
-        campiTetto.forEach(campo => {
-            document.getElementById(campo).style.display = 'flex';
-        });
-        campiConsumo.forEach(campo => {
-            document.getElementById(campo).style.display = 'flex';
-        });
-        if (campoTipoFornitura) campoTipoFornitura.style.display = 'flex';
-        campoSuperficie.style.display = 'none';
-        inputSuperficie.removeAttribute('required');
-        inputSuperficie.value = '';
-        document.getElementById('consumo').setAttribute('required', 'required');
-    }
-}
-
-function applicaStima() {
-    const stimaValue = document.getElementById('stimaSelect').value;
-    if (stimaValue) {
-        document.getElementById('consumo').value = stimaValue;
-    }
-}
-
-function validateAndCalculate() {
-    const area = document.getElementById('area').value;
-    const regione = document.getElementById('regione').value;
-    const installazioneCampoElement = document.getElementById('installazioneCampo');
-    const installazioneCampo = installazioneCampoElement ? installazioneCampoElement.value : 'no';
-    const consumo = document.getElementById('consumo').value;
-    const superficie = document.getElementById('superficie').value;
-    
-    if (!area || !regione) {
-        alert('Seleziona area geografica e regione');
-        return;
-    }
-    
-    if (installazioneCampo === 'si' && !superficie) {
-        alert('Inserisci la superficie del campo disponibile');
-        return;
-    }
-    
-    if (installazioneCampo === 'no' && !consumo) {
-        alert('Inserisci il consumo annuo');
-        return;
-    }
-    
-    calcola();
-    goToPage(3);
-}
-
-function calcola() {
-    const area = document.getElementById("area").value;
-    const regione = document.getElementById("regione").value;
-    const tipoFornitura = document.getElementById("tipoFornitura").value;
-    const consumoInput = document.getElementById("consumo").value;
-    const consumo = consumoInput ? parseFloat(consumoInput) : null;
-    const consumoPico = document.getElementById("consumoPico").value;
-    const installazioneCampoElement = document.getElementById("installazioneCampo");
-    const installazioneCampo = installazioneCampoElement ? installazioneCampoElement.value : "no";
-    const tipoTetto = document.getElementById("tipoTetto").value;
-    const esposizione = document.getElementById("esposizione").value;
-
-    let kWhPerKW;
-    if (area === "nord") kWhPerKW = 1200;
-    else if (area === "centro") kWhPerKW = 1300;
-    else kWhPerKW = 1500;
-
-    let fattoreEsposizione = 1.0;
-    
-    if (esposizione === "sud") {
-        fattoreEsposizione = tipoTetto === "inclinato" ? 1.0 : 0.95;
-    } else if (esposizione === "est" || esposizione === "ovest") {
-        fattoreEsposizione = tipoTetto === "inclinato" ? 0.82 : 0.78;
-    } else if (esposizione === "nord") {
-        fattoreEsposizione = tipoTetto === "inclinato" ? 0.65 : 0.70;
-    }
-
-    kWhPerKW = kWhPerKW * fattoreEsposizione;
-
-    const m2PerKWTetto = 7;
-    const m2PerKWCampo = 5;
-    const costoKW = 1500;
-    const costoBatteria = 3000;
-    const prezzoEnergia = 0.25;
-
-    let kWInstallabili, produzioneAnnua, numBatterie = 0;
-    let isCampoVendita = installazioneCampo === "si" || !consumo;
-
-    if (isCampoVendita) {
-        const superficieInput = document.getElementById("superficie").value;
-        const superficie = superficieInput ? parseFloat(superficieInput) : 0;
-        kWInstallabili = superficie / m2PerKWCampo;
-        produzioneAnnua = kWInstallabili * kWhPerKW;
-        numBatterie = 0;
-    } else {
-        let kWRichiesti = consumo / kWhPerKW;
-        kWInstallabili = kWRichiesti;
-        produzioneAnnua = kWInstallabili * kWhPerKW;
-        
-        let consumoGiornaliero = consumo / 365;
-        let shareNight = consumoPico === "notte" ? 0.7 : 0.3;
-        let consumoNotte = consumoGiornaliero * shareNight;
-        let capacitaBatteria = consumoNotte * 0.8;
-        numBatterie = consumoPico === "notte" ? Math.ceil(capacitaBatteria / 5) : 0;
-    }
-
-    let costoPannelli = kWInstallabili * costoKW;
-    let costoBatterie = numBatterie * costoBatteria;
-    let costoBase = costoPannelli + costoBatterie;
-    
-    let percentualeSurplus = surplusTrasferta[regione] || 0;
-    let costoTrasferta = costoBase * (percentualeSurplus / 100);
-    let costoTotale = costoBase + costoTrasferta;
-
-    let ricavoAnnuale = produzioneAnnua * prezzoEnergia;
-    let ammortamento = costoTotale / ricavoAnnuale;
-
-    const areaLabel = area === "nord" ? "Nord Italia" : area === "centro" ? "Centro Italia" : area === "sud" ? "Sud Italia" : "Isole";
-    const esposizioneLabel = esposizione.charAt(0).toUpperCase() + esposizione.slice(1);
-    const tipoTettoLabel = tipoTetto === "inclinato" ? "Inclinato" : "Piatto";
-    const efficienzaPerc = (fattoreEsposizione * 100).toFixed(0);
-    const tipoInstallazione = installazioneCampo === "si" ? "Campo Fotovoltaico (Vendita Energia)" : "Tetto";
-    const superficieInput = document.getElementById("superficie").value;
-    const superficieDisplay = superficieInput ? parseFloat(superficieInput) : 0;
-
-    let risultatoHTML = `
-        <div class="result-row">
-            <span class="result-label">Tipo Installazione</span>
-            <span class="result-value">${tipoInstallazione}</span>
-        </div>
-        <div class="result-row">
-            <span class="result-label">Area Geografica</span>
-            <span class="result-value">${areaLabel}</span>
-        </div>
-        <div class="result-row">
-            <span class="result-label">Regione</span>
-            <span class="result-value">${regione}</span>
-        </div>`;
-    
-    if (installazioneCampo === "si") {
-        risultatoHTML += `
-        <div class="result-row">
-            <span class="result-label">Superficie Campo</span>
-            <span class="result-value">${superficieDisplay} m²</span>
-        </div>`;
-    }
-    
-    if (installazioneCampo === "no" && consumo) {
-        risultatoHTML += `
-        <div class="result-row">
-            <span class="result-label">Esposizione / Tetto</span>
-            <span class="result-value">${esposizioneLabel} / ${tipoTettoLabel} (${efficienzaPerc}%)</span>
-        </div>`;
-    } else {
-        risultatoHTML += `
-        <div class="result-row">
-            <span class="result-label">Configurazione</span>
-            <span class="result-value">Ottimale (100%)</span>
-        </div>`;
-    }
-    
-    risultatoHTML += `
-        <div class="result-row">
-            <span class="result-label">Potenza Installata</span>
-            <span class="result-value">${kWInstallabili.toFixed(2)} kW</span>
-        </div>
-        <div class="result-row">
-            <span class="result-label">Produzione Annua</span>
-            <span class="result-value">${produzioneAnnua.toFixed(0)} kWh</span>
-        </div>`;
-    
-    if (!isCampoVendita) {
-        risultatoHTML += `
-        <div class="result-row">
-            <span class="result-label">Batterie Consigliate</span>
-            <span class="result-value">${numBatterie} unità</span>
-        </div>`;
-    }
-    
-    risultatoHTML += `
-        <div class="result-row">
-            <span class="result-label">Investimento Base</span>
-            <span class="result-value">€ ${costoBase.toLocaleString('it-IT', {minimumFractionDigits: 2})}</span>
-        </div>`;
-    
-    if (percentualeSurplus > 0) {
-        risultatoHTML += `
-        <div class="result-row">
-            <span class="result-label">Surplus Trasferta (${percentualeSurplus}%)</span>
-            <span class="result-value">€ ${costoTrasferta.toLocaleString('it-IT', {minimumFractionDigits: 2})}</span>
-        </div>`;
-    }
-    
-    risultatoHTML += `
-        <div class="result-row">
-            <span class="result-label">Investimento Totale</span>
-            <span class="result-value">€ ${costoTotale.toLocaleString('it-IT', {minimumFractionDigits: 2})}</span>
-        </div>
-        <div class="result-row">
-            <span class="result-label">${isCampoVendita ? 'Ricavo Annuale Stimato' : 'Risparmio Annuale'}</span>
-            <span class="result-value">€ ${ricavoAnnuale.toLocaleString('it-IT', {minimumFractionDigits: 2})}</span>
-        </div>
-        <div class="result-highlight">
-            <div class="label">Rientro Investimento</div>
-            <div class="value">${ammortamento.toFixed(1)} anni</div>
-        </div>
-    `;
-    
-    document.getElementById("risultatoTesto").innerHTML = risultatoHTML;
-}
-
-function scaricaPreventivo() {
-    const tipoCliente = document.getElementById("tipoCliente").value;
-    const area = document.getElementById("area").value;
-    const regione = document.getElementById("regione").value;
-    const tipoFornitura = document.getElementById("tipoFornitura").value;
-    const consumoInput = document.getElementById("consumo").value;
-    const consumo = consumoInput ? parseFloat(consumoInput) : null;
-    const consumoPico = document.getElementById("consumoPico").value;
-    const installazioneCampoElement = document.getElementById("installazioneCampo");
-    const installazioneCampo = installazioneCampoElement ? installazioneCampoElement.value : "no";
-    const tipoTetto = document.getElementById("tipoTetto").value;
-    const esposizione = document.getElementById("esposizione").value;
-    const materialeTetto = document.getElementById("materialeTetto").value;
-
-    let kWhPerKW;
-    if (area === "nord") kWhPerKW = 1200;
-    else if (area === "centro") kWhPerKW = 1300;
-    else kWhPerKW = 1500;
-
-    let fattoreEsposizione = 1.0;
-    if (esposizione === "sud") {
-        fattoreEsposizione = tipoTetto === "inclinato" ? 1.0 : 0.95;
-    } else if (esposizione === "est" || esposizione === "ovest") {
-        fattoreEsposizione = tipoTetto === "inclinato" ? 0.82 : 0.78;
-    } else if (esposizione === "nord") {
-        fattoreEsposizione = tipoTetto === "inclinato" ? 0.65 : 0.70;
-    }
-
-    kWhPerKW = kWhPerKW * fattoreEsposizione;
-
-    const m2PerKWTetto = 7;
-    const m2PerKWCampo = 5;
-    const costoKW = 1500;
-    const costoBatteria = 3000;
-    const prezzoEnergia = 0.25;
-    const potenzaPannello = 0.45;
-
-    let kWInstallabili, produzioneAnnua, numBatterie = 0;
-    let isCampoVendita = installazioneCampo === "si";
-    let superficie = 0;
-
-    if (isCampoVendita) {
-        const superficieInput = document.getElementById("superficie").value;
-        superficie = superficieInput ? parseFloat(superficieInput) : 0;
-        
-        if (superficie === 0) {
-            alert("Per l'installazione su campo fotovoltaico è necessario inserire la superficie disponibile.");
-            return;
-        }
-        
-        kWInstallabili = superficie / m2PerKWCampo;
-        produzioneAnnua = kWInstallabili * kWhPerKW;
-        numBatterie = 0;
-    } else {
-        if (!consumo || consumo === 0) {
-            alert("Per l'installazione su tetto è necessario inserire il consumo annuo.");
-            return;
-        }
-        
-        let kWRichiesti = consumo / kWhPerKW;
-        kWInstallabili = kWRichiesti;
-        produzioneAnnua = kWInstallabili * kWhPerKW;
-        superficie = kWInstallabili * m2PerKWTetto;
-        
-        let consumoGiornaliero = consumo / 365;
-        let shareNight = consumoPico === "notte" ? 0.7 : 0.3;
-        let consumoNotte = consumoGiornaliero * shareNight;
-        let capacitaBatteria = consumoNotte * 0.8;
-        numBatterie = consumoPico === "notte" ? Math.ceil(capacitaBatteria / 5) : 0;
-    }
-    
-    let costoPannelli = kWInstallabili * costoKW;
-    let costoBatterie = numBatterie * costoBatteria;
-    let costoBase = costoPannelli + costoBatterie;
-    
-    let percentualeSurplus = surplusTrasferta[regione] || 0;
-    let costoTrasferta = costoBase * (percentualeSurplus / 100);
-    let costoTotale = costoBase + costoTrasferta;
-    
-    let ricavoAnnuale = produzioneAnnua * prezzoEnergia;
-    let ammortamento = costoTotale / ricavoAnnuale;
-
-    let numPannelli = Math.ceil(kWInstallabili / potenzaPannello);
-
-    let inverter = "";
-    let tipoInverter = "";
-    let specificheTecniche = {};
-    
-    if (numBatterie > 0) {
-        if (tipoFornitura === "monofase") {
-            tipoInverter = "Ibrido Monofase con Accumulo";
-            if (kWInstallabili <= 4.5) {
-                inverter = "HYD 3000-ZSS";
-                specificheTecniche = {
-                    gamma: "3 kW",
-                    tipo: "Inverter ibrido monofase per impianti con accumulo integrato",
-                    compatibilita: "Batterie al litio ZCS e altri modelli compatibili",
-                    funzione: "Gestione simultanea di produzione fotovoltaica, accumulo e rete",
-                    efficienza: "Fino al 97,6%",
-                    tensioneMPPT: "180 – 550 Vdc",
-                    mppt: "2 MPPT indipendenti",
-                    tensione: "230 Vac (monofase)",
-                    protezione: "Anti-islanding, sovratensione, inversione polarità, cortocircuito",
-                    comunicazione: "Wi-Fi / Ethernet / RS485",
-                    grado: "IP65",
-                    rumorosita: "< 25 dB"
-                };
-            } else {
-                inverter = "HYD 6000-ZSS";
-                specificheTecniche = {
-                    gamma: "6 kW",
-                    tipo: "Inverter ibrido monofase per impianti con accumulo integrato",
-                    compatibilita: "Batterie al litio ZCS e altri modelli compatibili",
-                    funzione: "Gestione simultanea di produzione fotovoltaica, accumulo e rete",
-                    efficienza: "Fino al 97,6%",
-                    tensioneMPPT: "180 – 550 Vdc",
-                    mppt: "2 MPPT indipendenti",
-                    tensione: "230 Vac (monofase)",
-                    protezione: "Anti-islanding, sovratensione, inversione polarità, cortocircuito",
-                    comunicazione: "Wi-Fi / Ethernet / RS485",
-                    grado: "IP65",
-                    rumorosita: "< 25 dB"
-                };
-            }
-        } else {
-            tipoInverter = "Ibrido Trifase con Accumulo";
-            if (kWInstallabili <= 6.5) {
-                inverter = "HYD 5000 ZSS";
-            } else if (kWInstallabili <= 9) {
-                inverter = "HYD 8000 ZSS";
-            } else if (kWInstallabili <= 12.5) {
-                inverter = "HYD 10000 ZSS";
-            } else if (kWInstallabili <= 17.5) {
-                inverter = "HYD 15000 ZSS";
-            } else {
-                inverter = "HYD 20000 ZSS";
-            }
-            specificheTecniche = {
-                gamma: "5 - 20 kW",
-                tipo: "Inverter ibrido trifase per impianti con accumulo integrato",
-                compatibilita: "Batterie al litio ZCS e altri modelli compatibili",
-                funzione: "Gestione simultanea di produzione fotovoltaica, accumulo e rete",
-                efficienza: "Fino al 97,6%",
-                tensioneMPPT: "180 – 850 Vdc",
-                mppt: "2 MPPT indipendenti",
-                tensione: "400 Vac (trifase)",
-                protezione: "Anti-islanding, sovratensione, inversione polarità, cortocircuito",
-                comunicazione: "Wi-Fi / Ethernet / RS485",
-                grado: "IP65",
-                rumorosita: "< 25 dB"
-            };
-        }
-    } else {
-        if (tipoFornitura === "monofase" && kWInstallabili <= 6) {
-            tipoInverter = "Monofase";
-            if (kWInstallabili <= 2.2) {
-                inverter = "TL-V3 1,1 kW";
-            } else if (kWInstallabili <= 3) {
-                inverter = "TL-V3 3 kW";
-            } else if (kWInstallabili <= 3.3) {
-                inverter = "TL-V3 3,3 kW";
-            } else if (kWInstallabili <= 4.5) {
-                inverter = "TLM-V3 3 kW";
-            } else if (kWInstallabili <= 5) {
-                inverter = "TLM-V3 5 kW";
-            } else {
-                inverter = "TLM-V3 6 kW";
-            }
-            specificheTecniche = {
-                gamma: "1,1 - 6 kW",
-                tipo: "Inverter fotovoltaico monofase connesso alla rete (senza accumulo)",
-                funzione: "Conversione energia prodotta dai moduli in energia utilizzabile in rete",
-                efficienza: "Fino al 97,8%",
-                tensioneMPPT: "100 – 550 Vdc",
-                mppt: "2 MPPT indipendenti",
-                tensione: "230 Vac (monofase)",
-                protezione: "Anti-islanding, sovratensione AC/DC, inversione polarità, cortocircuito",
-                comunicazione: "Wi-Fi / RS485",
-                grado: "IP65",
-                rumorosita: "< 25 dB"
-            };
-        } else {
-            tipoInverter = "Trifase";
-            if (kWInstallabili <= 7.5) {
-                inverter = "3PH 3.3KTL-V1";
-            } else if (kWInstallabili <= 11) {
-                inverter = "3PH 10KTL-V2";
-            } else if (kWInstallabili <= 13.5) {
-                inverter = "3PH 12KTL-V1";
-            } else if (kWInstallabili <= 17.5) {
-                inverter = "3PH 15KTL-V2";
-            } else if (kWInstallabili <= 22.5) {
-                inverter = "3PH 20KTL-V2";
-            } else if (kWInstallabili <= 27.5) {
-                inverter = "3PH 25KTL-V3";
-            } else if (kWInstallabili <= 31.5) {
-                inverter = "3PH 30KTL-V3";
-            } else if (kWInstallabili <= 34.5) {
-                inverter = "3PH 33KTL-V2";
-            } else if (kWInstallabili <= 38) {
-                inverter = "3PH 36KTL-V3";
-            } else if (kWInstallabili <= 42.5) {
-                inverter = "3PH 40KTL-V3";
-            } else if (kWInstallabili <= 47.5) {
-                inverter = "3PH 45KTL-V3";
-            } else if (kWInstallabili <= 55) {
-                inverter = "3PH 50KTL-V3";
-            } else if (kWInstallabili <= 70) {
-                inverter = "3PH 60KTL-V3";
-            } else if (kWInstallabili <= 90) {
-                inverter = "3PH 80KTL-V3";
-            } else if (kWInstallabili <= 105) {
-                inverter = "3PH 100KTL-V4";
-            } else if (kWInstallabili <= 180) {
-                inverter = "3PH 110KTL-V4";
-            } else if (kWInstallabili <= 290) {
-                inverter = "3PH 250KTL-HV Z0";
-            } else if (kWInstallabili <= 340) {
-                inverter = "3PH 330KTL-HV Z0";
-            } else {
-                inverter = "3PH 350KTL-HV Z0";
-            }
-            specificheTecniche = {
-                gamma: "3,3 - 350 kW",
-                tipo: "Inverter fotovoltaico trifase connesso alla rete (senza accumulo)",
-                funzione: "Conversione energia prodotta dai moduli in energia trifase per autoconsumo o immissione in rete",
-                efficienza: "Fino al 98,6%",
-                tensioneMPPT: "180 – 1000 Vdc",
-                mppt: "2 o più MPPT indipendenti",
-                tensione: "400 Vac (trifase)",
-                protezione: "Anti-islanding, sovratensione AC/DC, inversione polarità, cortocircuito",
-                comunicazione: "Wi-Fi / RS485 / Ethernet",
-                grado: "IP65",
-                rumorosita: "< 30 dB"
-            };
-        }
-    }
-
-    let isCampoVenditaPDF = isCampoVendita;
-
-    const areaLabel = area === "nord" ? "Nord Italia" : area === "centro" ? "Centro Italia" : area === "sud" ? "Sud Italia" : "Isole";
-    const esposizioneLabel = esposizione.charAt(0).toUpperCase() + esposizione.slice(1);
-    const tipoTettoLabel = tipoTetto === "inclinato" ? "Inclinato" : "Piatto";
-    const tipoClienteLabel = tipoCliente === "privato" ? "Privato" : "Azienda";
-    const tipoInstallazione = installazioneCampo === "si" ? "Campo" : "Tetto";
-    const dataOggi = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-    let sezionePagamenti = '';
-    if (tipoCliente === "privato") {
-        sezionePagamenti = `
-    <h2 class="section-title">MODALITÀ DI PAGAMENTO</h2>
-    
-    <div class="info-box" style="background: #eff6ff; border-left: 4px solid #2563eb;">
-        <strong style="font-size: 16px; color: #2563eb;">PAGAMENTI:</strong><br><br>
-        <strong>► 30% ACCONTO + SALDO FINE LAVORI</strong><br><br>
-        <strong>► ALTERNATIVA: Pagamento a Rate con Findomestic</strong>
-    </div>
-
-    <div style="margin: 25px 0; padding: 20px; background: white; border: 2px solid #2563eb; border-radius: 8px;">
-        <h3 style="color: #2563eb; margin-bottom: 15px; font-size: 18px;">Impianti per Privati: Sicurezza ed Energia con Pagamento Flessibile</h3>
-        <p style="margin-bottom: 15px; line-height: 1.8;">
-            Grazie alla nostra partnership con <strong>Findomestic</strong>, anche i privati possono accedere facilmente ai nostri impianti di fotovoltaico, allarme e videosorveglianza, senza dover sostenere l'intero investimento iniziale. È possibile rateizzare l'acquisto tramite un prestito dedicato, con condizioni chiare e vantaggiose, così da distribuire il costo nel tempo senza rinunciare alla qualità e all'efficienza dei sistemi.
-        </p>
-        <div style="background: #eff6ff; padding: 15px; border-radius: 6px; margin-top: 15px;">
-            <p style="font-style: italic; color: #2563eb; font-size: 16px; font-weight: 600; text-align: center;">
-                "Sicurezza ed energia alla portata di tutti"
-            </p>
-        </div>
-        <p style="margin-top: 15px; line-height: 1.8;">
-            Grazie a queste soluzioni, ogni famiglia può proteggere la propria abitazione, monitorare la sicurezza e produrre energia pulita, con la massima comodità e flessibilità, valorizzando l'immobile e riducendo le spese fin da subito.
-        </p>
-    </div>
-        `;
-    } else {
-        sezionePagamenti = `
-    <h2 class="section-title">MODALITÀ DI PAGAMENTO</h2>
-    
-    <div class="info-box" style="background: #eff6ff; border-left: 4px solid #2563eb;">
-        <strong style="font-size: 16px; color: #2563eb;">PAGAMENTI:</strong><br><br>
-        <strong>► 30% ACCONTO + SALDO FINE LAVORI</strong><br><br>
-        <strong>► ALTERNATIVA: Noleggio Operativo con Grenke</strong>
-    </div>
-
-    <div style="margin: 25px 0; padding: 20px; background: white; border: 2px solid #2563eb; border-radius: 8px;">
-        <h3 style="color: #2563eb; margin-bottom: 15px; font-size: 18px;">Noleggio Impianti per Aziende</h3>
-        <p style="margin-bottom: 15px; line-height: 1.8;">
-            Grazie alla collaborazione con <strong>Grenke</strong>, le aziende hanno la possibilità di noleggiare i nostri impianti di fotovoltaico, allarme e videosorveglianza, evitando l'investimento iniziale e gestendo i costi in modo semplice e flessibile. Questa soluzione permette di avere subito a disposizione impianti completi e altamente efficienti, personalizzati sulle esigenze dell'attività, pagando un canone mensile fisso senza incidere sul capitale aziendale.
-        </p>
-        <p style="margin-bottom: 15px; line-height: 1.8;">
-            Il noleggio è pensato esclusivamente per aziende, studi professionali e attività commerciali, offrendo un modo conveniente per aumentare la sicurezza, migliorare l'efficienza energetica e tutelare il proprio business senza vincoli finanziari immediati.
-        </p>
-        <div style="background: #eff6ff; padding: 15px; border-radius: 6px; margin: 15px 0;">
-            <p style="font-style: italic; color: #2563eb; font-size: 16px; font-weight: 600; text-align: center;">
-                "Un grande vantaggio"
-            </p>
-        </div>
-        <p style="line-height: 1.8;">
-            Al termine del periodo di noleggio, l'azienda può scegliere se restituire l'impianto nel caso non ne abbia più bisogno, oppure conservarlo definitivamente, diventandone proprietaria. In questo modo si uniscono flessibilità, sicurezza e risparmio, permettendo di investire subito in tecnologia avanzata senza impegnare il capitale e con la libertà di decidere in base alle proprie esigenze.
-        </p>
-    </div>
-        `;
-    }
-
-    const preventivoHTML = `
-<!DOCTYPE html>
-<html lang="it">
-<head>
     <meta charset="UTF-8">
-    <title>Preventivo Impianto Fotovoltaico - Bertuzzi Energy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bertuzzi Energy - Solar Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        @media print {
-            body { margin: 0; }
-            .no-print { display: none; }
-        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            max-width: 210mm;
-            margin: 20px auto;
-            padding: 20mm;
-            background: white;
-            color: #1a1a1a;
-            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
         }
-        .header {
-            text-align: center;
-            border-bottom: 3px solid #2563eb;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
-        .logo {
-            font-size: 32px;
-            font-weight: 700;
-            color: #2563eb;
-            margin-bottom: 5px;
+        .hero-overlay {
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.4), transparent);
         }
-        .subtitle {
-            font-size: 14px;
-            color: #666;
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .info-box {
-            background: #f8fffe;
-            padding: 15px;
-            border-left: 4px solid #2563eb;
-            margin: 20px 0;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2563eb;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        th {
-            background: #f5f5f5;
-            font-weight: 700;
-            color: #2563eb;
-        }
-        .highlight {
-            background: #2563eb;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        .highlight .value {
-            font-size: 28px;
-            font-weight: 700;
-            margin: 10px 0;
-        }
-        .highlight .label {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #e0e0e0;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-        }
-        .btn-print {
-            background: #2563eb;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 20px auto;
-            display: block;
-        }
-        .btn-print:hover {
+        ::-webkit-scrollbar-thumb {
             background: #3b82f6;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes zoomIn95 {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .animate-fadeInDown {
+            animation: fadeInDown 0.6s ease-out;
+        }
+        .animate-zoomIn95 {
+            animation: zoomIn95 0.3s ease-out;
+        }
+        .checkbox-custom:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
         }
     </style>
 </head>
-<body>
-    <button class="btn-print no-print" onclick="window.print()">Stampa / Salva come PDF</button>
+<body class="bg-slate-50 text-slate-900">
+    <div id="root" class="min-h-screen flex flex-col"></div>
 
-    <div class="header">
-        <div class="logo">BERTUZZI ENERGY</div>
-        <div class="subtitle">Soluzioni Fotovoltaiche Professionali</div>
-    </div>
+    <script>
+    // ==================== CONSTANTS ====================
+    const PARAMS = {
+        valoreAcquistoEnergia: 0.28,
+        percentualeAutoconsumo: 0.65,
+        percentualeAutoconsumoStorage: 0.95,
+        tariffaRitiroDedicato: 0.11,
+        prezzoStorage: 500,
+        potenzaModulo: 450
+    };
 
-    <div class="info-box">
-        <strong>PREVENTIVO N.</strong> PREV-${Date.now()}<br>
-        <strong>Data:</strong> ${dataOggi}<br>
-        <strong>Validità:</strong> 30 giorni<br>
-        <strong>Tipologia Cliente:</strong> ${tipoClienteLabel}
-    </div>
+    const FASCE_CONSUMO = [
+        { min: 0, max: 3600, nome: "Impianto 3 kWp", kWp: 3.15, nModuli: 7, prezzoNetto: 5000 },
+        { min: 3601, max: 4800, nome: "Impianto 4 kWp", kWp: 4.05, nModuli: 9, prezzoNetto: 6300 },
+        { min: 4801, max: 6000, nome: "Impianto 5 kWp", kWp: 4.95, nModuli: 11, prezzoNetto: 7000 },
+        { min: 6001, max: 7200, nome: "Impianto 6 kWp", kWp: 6.3, nModuli: 14, prezzoNetto: 7500 },
+        { min: 7201, max: 999999, nome: "Impianto 8 kWp", kWp: 7.65, nModuli: 17, prezzoNetto: 12500 }
+    ];
 
-    <h2 class="section-title">RIEPILOGO CONFIGURAZIONE CLIENTE</h2>
-    <table>
-        <tr>
-            <th>Parametro</th>
-            <th>Valore</th>
-        </tr>
-        <tr>
-            <td>Tipologia Cliente</td>
-            <td>${tipoClienteLabel}</td>
-        </tr>
-        <tr>
-            <td>Tipo Installazione</td>
-            <td>${tipoInstallazione}</td>
-        </tr>
-        <tr>
-            <td>Area Geografica</td>
-            <td>${areaLabel}</td>
-        </tr>
-        <tr>
-            <td>Regione</td>
-            <td>${regione}</td>
-        </tr>
-        ${installazioneCampo === "si" ? `
-        <tr>
-            <td>Tipo di Fornitura</td>
-            <td>Trifase (400V) - Standard per impianti campo</td>
-        </tr>
-        ` : `
-        <tr>
-            <td>Tipo di Fornitura</td>
-            <td>${tipoFornitura === "monofase" ? "Monofase (230V)" : "Trifase (400V)"}</td>
-        </tr>
-        `}
-        ${consumo ? `
-        <tr>
-            <td>Consumo Annuo Stimato</td>
-            <td>${consumo.toLocaleString('it-IT')} kWh/anno</td>
-        </tr>
-        ` : ''}
-        ${installazioneCampo === "si" ? `
-        <tr>
-            <td>Superficie Campo Disponibile</td>
-            <td>${superficie} m²</td>
-        </tr>
-        ` : ''}
-        ${installazioneCampo === "no" ? `
-        <tr>
-            <td>Tipologia Tetto</td>
-            <td>${tipoTettoLabel}</td>
-        </tr>
-        <tr>
-            <td>Esposizione</td>
-            <td>${esposizioneLabel}</td>
-        </tr>
-        <tr>
-            <td>Materiale Copertura</td>
-            <td>${materialeTetto.charAt(0).toUpperCase() + materialeTetto.slice(1)}</td>
-        </tr>
-        ` : `
-        <tr>
-            <td>Configurazione</td>
-            <td>Struttura con angolazione ottimale per massima produzione</td>
-        </tr>
-        `}
-        ${consumo && !isCampoVenditaPDF ? `
-        <tr>
-            <td>Picco di Consumo</td>
-            <td>${consumoPico === "notte" ? "Serale/Notturno" : "Diurno"}</td>
-        </tr>
-        ` : ''}
-    </table>
+    const ACCUMULO_CONFIG = {
+        '0-3600': 5,
+        '3601-4800': 5,
+        '4801-6000': 5,
+        '6001-7200': 5,
+        '7201+': 15
+    };
 
-    <h2 class="section-title">SOLUZIONE PROPOSTA</h2>
-    
-    <div class="highlight">
-        <div class="label">POTENZA IMPIANTO FOTOVOLTAICO</div>
-        <div class="value">${kWInstallabili.toFixed(2)} kW</div>
-        <div class="label">Produzione Annua Stimata: ${produzioneAnnua.toFixed(0)} kWh</div>
-        ${isCampoVenditaPDF ? '<div class="label" style="margin-top: 10px; font-weight: 600;">Impianto per Vendita Energia alla Rete</div>' : ''}
-    </div>
+    const PREZZI_CON_ACCUMULO = {
+        '0-3600': { prezzoNetto: 7500 },
+        '3601-4800': { prezzoNetto: 8800 },
+        '4801-6000': { prezzoNetto: 9500 },
+        '6001-7200': { prezzoNetto: 10000 },
+        '7201+': { prezzoNetto: 15000 }
+    };
 
-    <h2 class="section-title">MODULI FOTOVOLTAICI</h2>
-    <table>
-        <tr>
-            <th>Caratteristica</th>
-            <th>Specifica</th>
-        </tr>
-        <tr>
-            <td><strong>Quantità</strong></td>
-            <td><strong>${numPannelli} moduli</strong></td>
-        </tr>
-        <tr>
-            <td>Tipologia</td>
-            <td>Modulo Monocristallino</td>
-        </tr>
-        <tr>
-            <td>Tecnologia</td>
-            <td>Celle N-type i-TOPCon</td>
-        </tr>
-        <tr>
-            <td>Potenza Modulo</td>
-            <td>450 W</td>
-        </tr>
-        <tr>
-            <td>Dimensioni</td>
-            <td>1.762 × 1.134 × 30 mm</td>
-        </tr>
-        <tr>
-            <td>Peso</td>
-            <td>21 kg</td>
-        </tr>
-    </table>
+    const PRODUZIONE_KWH_KWP = {
+        nord: { sud: 1250, est: 1150, ovest: 1150, nord: 950 },
+        centro: { sud: 1300, est: 1200, ovest: 1200, nord: 1000 },
+        sud: { sud: 1450, est: 1300, ovest: 1300, nord: 1100 }
+    };
 
-    <h2 class="section-title">INVERTER</h2>
-    <table>
-        <tr>
-            <th>Caratteristica</th>
-            <th>Specifica</th>
-        </tr>
-        <tr>
-            <td><strong>Modello Inverter</strong></td>
-            <td><strong>${inverter}</strong></td>
-        </tr>
-        <tr>
-            <td>Tipologia</td>
-            <td>${specificheTecniche.tipo}</td>
-        </tr>
-        ${numBatterie > 0 ? `
-        <tr>
-            <td>Compatibilità batterie</td>
-            <td>${specificheTecniche.compatibilita}</td>
-        </tr>
-        ` : ''}
-        <tr>
-            <td>Funzione principale</td>
-            <td>${specificheTecniche.funzione}</td>
-        </tr>
-        <tr>
-            <td>Tensione di rete</td>
-            <td>${specificheTecniche.tensione}</td>
-        </tr>
-        <tr>
-            <td>Comunicazione</td>
-            <td>${specificheTecniche.comunicazione} - Monitoraggio tramite ZCS Azzurro Cloud</td>
-        </tr>
-        <tr>
-            <td>Grado di protezione</td>
-            <td>${specificheTecniche.grado} - Adatto per installazione interna o esterna</td>
-        </tr>
-    </table>
+    const RATE_FINDOMESTIC = {
+        '0-3600': { senzaStorage: 74.3, conStorage: 111.4 },
+        '3601-4800': { senzaStorage: 93.6, conStorage: 130.7 },
+        '4801-6000': { senzaStorage: 104, conStorage: 141.1 },
+        '6001-7200': { senzaStorage: 111.4, conStorage: 148.5 },
+        '7201+': { senzaStorage: 187.5, conStorage: 222.8 }
+    };
 
-    ${numBatterie > 0 && !isCampoVenditaPDF ? `
-    <h2 class="section-title">SISTEMA DI ACCUMULO</h2>
-    <table>
-        <tr>
-            <th>Componente</th>
-            <th>Specifica</th>
-        </tr>
-        <tr>
-            <td><strong>Batterie di Accumulo</strong></td>
-            <td><strong>${numBatterie} × Azzurro ZCS (5 kWh)</strong></td>
-        </tr>
-        <tr>
-            <td>Capacità Totale Sistema</td>
-            <td>${numBatterie * 5} kWh</td>
-        </tr>
-        <tr>
-            <td colspan="2" style="font-size: 13px; color: #666;">
-                Sistema di accumulo agli ioni di litio ad alte prestazioni per massimizzare 
-                l'autoconsumo e l'indipendenza energetica.
-            </td>
-        </tr>
-    </table>
-    ` : ''}
+    const REGIONI_PER_AREA = {
+        nord: ['Emilia-Romagna', 'Lombardia', 'Veneto', 'Piemonte', 'Liguria', 'Trentino-Alto Adige', 'Friuli-Venezia Giulia', "Valle d'Aosta"],
+        centro: ['Toscana', 'Marche', 'Umbria', 'Lazio', 'Abruzzo', 'Molise'],
+        sud: ['Campania', 'Puglia', 'Basilicata', 'Calabria', 'Sicilia', 'Sardegna']
+    };
 
-    <h2 class="section-title">ANALISI ECONOMICA</h2>
-    <table>
-        <tr>
-            <th>Voce</th>
-            <th>Importo</th>
-        </tr>
-        <tr>
-            <td>Moduli Fotovoltaici e Inverter</td>
-            <td>€ ${costoPannelli.toLocaleString('it-IT', {minimumFractionDigits: 2})}</td>
-        </tr>
-        ${numBatterie > 0 && !isCampoVenditaPDF ? `
-        <tr>
-            <td>Sistema di Accumulo</td>
-            <td>€ ${costoBatterie.toLocaleString('it-IT', {minimumFractionDigits: 2})}</td>
-        </tr>
-        ` : ''}
-        <tr style="background: #f5f5f5; font-weight: 700;">
-            <td>INVESTIMENTO TOTALE (chiavi in mano)</td>
-            <td>€ ${costoTotale.toLocaleString('it-IT', {minimumFractionDigits: 2})}</td>
-        </tr>
-        <tr>
-            <td>${isCampoVenditaPDF ? 'Ricavo Annuale Stimato (Vendita Energia)' : 'Risparmio Energetico Annuo'}</td>
-            <td>€ ${ricavoAnnuale.toLocaleString('it-IT', {minimumFractionDigits: 2})}</td>
-        </tr>
-        <tr style="background: #f8fffe; font-weight: 700; color: #2563eb;">
-            <td>RIENTRO INVESTIMENTO</td>
-            <td>${ammortamento.toFixed(1)} anni</td>
-        </tr>
-    </table>
+    const SURPLUS_TRASFERTA = {
+        'Emilia-Romagna': 0, 'Toscana': 5, 'Marche': 5, 'Veneto': 5, 'Lombardia': 5,
+        'Liguria': 8, 'Piemonte': 8, 'Trentino-Alto Adige': 8, 'Umbria': 8, 'Lazio': 8,
+        'Abruzzo': 10, 'Molise': 10, 'Campania': 10, 'Puglia': 10, 'Basilicata': 10,
+        'Calabria': 10, 'Sicilia': 10, 'Sardegna': 10, 'Friuli-Venezia Giulia': 10, "Valle d'Aosta": 10
+    };
 
-    ${sezionePagamenti}
+    // ==================== STATE ====================
+    let currentSection = 'hero';
+    let calculationResults = null;
+    let formData = {
+        tipoCliente: 'privato',
+        area: '',
+        regione: '',
+        consumo: 3500,
+        tipoFornitura: 'monofase',
+        profiloConsumi: 'diurno',
+        esposizione: 'sud',
+        tipoTetto: 'falde'
+    };
+    let customerData = {
+        nome: '',
+        cognome: '',
+        email: '',
+        telefono: '',
+        indirizzo: '',
+        citta: '',
+        cap: '',
+        accettato: false
+    };
 
-    <div class="info-box" style="margin-top: 30px;">
-        <strong>NOTE IMPORTANTI:</strong><br>
-        • <strong>Prezzo comprensivo di installazione chiavi in mano</strong><br>
-        • <strong>I prezzi indicati sono IVA inclusa</strong><br>
-        ${isCampoVenditaPDF ? `• <strong>Impianto per vendita energia: il ricavo annuale è calcolato sulla produzione totale venduta alla rete</strong><br>` : ''}
-        ${isCampoVenditaPDF ? `• <strong>Installazione su campo fotovoltaico: 5 m² per ogni kW installato</strong><br>` : ''}
-        • Include: moduli, inverter, strutture di montaggio${installazioneCampo === "si" ? ' (struttura per campo con angolazione ottimale)' : ''}, cablaggio, quadri elettrici${numBatterie > 0 && !isCampoVenditaPDF ? ', sistema di accumulo' : ''}<br>
-        • Include: progettazione, installazione completa, collaudo, pratiche GSE e connessione alla rete<br>
-        ${installazioneCampo === "si" ? '• <strong>Installazione su campo: la struttura sarà progettata con angolazione ottimale per massimizzare la produzione e il ricavo</strong><br>' : ''}
-        ${isCampoVenditaPDF ? '• <strong>Per impianti di vendita energia: necessarie ulteriori pratiche burocratiche per accesso agli incentivi statali (tariffa incentivante)</strong><br>' : ''}
-        • Garanzia: 25 anni sui moduli, 10 anni sull'inverter${numBatterie > 0 && !isCampoVenditaPDF ? ', 10 anni sulle batterie' : ''}<br>
-        • Possibilità di accesso agli incentivi fiscali vigenti<br>
-        • Preventivo valido 30 giorni dalla data di emissione
-    </div>
+    // ==================== SOLAR LOGIC ====================
+    function calculateSolar(input) {
+        const fascia = FASCE_CONSUMO.find(f => input.consumo >= f.min && input.consumo <= f.max);
+        if (!fascia) throw new Error('Consumo fuori range');
 
-    <h2 class="section-title" style="margin-top: 50px;">ACCETTAZIONE PREVENTIVO</h2>
-    
-    <div class="info-box" style="background: #fff8e1; border-left: 4px solid #f57c00;">
-        <strong style="color: #f57c00;">ISTRUZIONI:</strong><br>
-        Compilare i seguenti dati, firmare il preventivo e inviarlo via email a <strong>info@bertuzzienergy.it</strong><br>
-        Entro <strong>una settimana lavorativa</strong> riceverete il progetto dettagliato dell'abitazione con l'impianto fotovoltaico.<br>
-        Successivamente concorderemo insieme l'inizio dei lavori.
-    </div>
+        let fasciaKey;
+        if (input.consumo <= 3600) fasciaKey = '0-3600';
+        else if (input.consumo <= 4800) fasciaKey = '3601-4800';
+        else if (input.consumo <= 6000) fasciaKey = '4801-6000';
+        else if (input.consumo <= 7200) fasciaKey = '6001-7200';
+        else fasciaKey = '7201+';
 
-    <table style="margin-top: 25px;">
-        <tr>
-            <td style="width: 50%; padding: 20px; border: 2px solid #e0e0e0;">
-                <strong style="color: #2563eb;">DATI CLIENTE</strong><br><br>
-                Nome e Cognome: _________________________________<br><br>
-                Indirizzo: _________________________________________<br><br>
-                CAP e Città: ______________________________________<br><br>
-                Telefono: __________________________________________<br><br>
-                Email: _____________________________________________
-            </td>
-            <td style="width: 50%; padding: 20px; border: 2px solid #e0e0e0; border-left: none;">
-                <strong style="color: #2563eb;">FIRMA PER ACCETTAZIONE</strong><br><br>
-                <div style="height: 120px; border-bottom: 2px solid #333; margin-top: 80px;"></div>
-                <div style="text-align: center; margin-top: 10px; font-size: 12px; color: #666;">
-                    Data ____/____/________ Firma del Cliente
+        const conStorage = input.profiloConsumi === 'serale';
+        const accumuloKWh = conStorage ? ACCUMULO_CONFIG[fasciaKey] : 0;
+
+        const produzioneKWhKWp = PRODUZIONE_KWH_KWP[input.area][input.esposizione];
+        const produzioneAnnua = Math.round(fascia.kWp * produzioneKWhKWp);
+
+        const percAutoconsumo = conStorage ? PARAMS.percentualeAutoconsumoStorage : PARAMS.percentualeAutoconsumo;
+        const energiaAutoconsumata = Math.round(produzioneAnnua * percAutoconsumo);
+        const energiaImmessaRete = produzioneAnnua - energiaAutoconsumata;
+
+        const risparmioAutoconsumo = Math.round(energiaAutoconsumata * PARAMS.valoreAcquistoEnergia);
+        const ritiroDedicato = Math.round(energiaImmessaRete * PARAMS.tariffaRitiroDedicato);
+        const risparmioTotaleAnnuo = risparmioAutoconsumo + ritiroDedicato;
+
+        let prezzoNettoBase = conStorage ? PREZZI_CON_ACCUMULO[fasciaKey].prezzoNetto : fascia.prezzoNetto;
+        const aliquotaIVA = input.tipoCliente === 'privato' ? 0.1 : 0.22;
+
+        const percentualeSurplus = SURPLUS_TRASFERTA[input.regione] || 0;
+        const costoTrasferta = Math.round(prezzoNettoBase * (percentualeSurplus / 100));
+        const prezzoFinaleNetto = prezzoNettoBase + costoTrasferta;
+        const prezzoIVA = Math.round(prezzoFinaleNetto * (1 + aliquotaIVA));
+
+        const detrazione50 = Math.round(prezzoIVA * 0.5);
+        const detrazioneAnnuale = Math.round(detrazione50 / 10);
+        const risparmioConDetrazione = risparmioTotaleAnnuo + detrazioneAnnuale;
+
+        const rientroInvestimento = prezzoIVA / risparmioConDetrazione;
+
+        const rataFindomestic = conStorage ? RATE_FINDOMESTIC[fasciaKey].conStorage : RATE_FINDOMESTIC[fasciaKey].senzaStorage;
+        const rataAnnuale = Math.round(rataFindomestic * 12);
+        const superficieMinima = Math.round(fascia.nModuli * 2.5);
+
+        return {
+            ...input,
+            fasciaKey,
+            nomeImpianto: fascia.nome,
+            kWp: fascia.kWp,
+            nModuli: fascia.nModuli,
+            accumuloKWh,
+            conStorage,
+            produzioneKWhKWp,
+            produzioneAnnua,
+            percAutoconsumo: Math.round(percAutoconsumo * 100),
+            energiaAutoconsumata,
+            energiaImmessaRete,
+            risparmioAutoconsumo,
+            ritiroDedicato,
+            risparmioTotaleAnnuo,
+            prezzoNetto: prezzoNettoBase,
+            prezzoIVA,
+            percentualeSurplus,
+            costoTrasferta,
+            prezzoFinale: prezzoIVA,
+            detrazione50,
+            detrazioneAnnuale,
+            risparmioConDetrazione,
+            rientroInvestimento,
+            rataFindomestic,
+            rataAnnuale,
+            superficieMinima
+        };
+    }
+
+    // ==================== RENDER FUNCTIONS ====================
+    function renderNavbar() {
+        if (currentSection !== 'hero') return '';
+        return `
+            <nav class="fixed top-0 left-0 right-0 z-[100] h-20 flex items-center bg-black/40 backdrop-blur-lg border-b border-white/10 transition-all duration-500 animate-fadeIn">
+                <div class="max-w-[1400px] mx-auto px-8 w-full flex justify-between items-center relative">
+                    <div class="absolute left-8 top-1/2 -translate-y-1/2 cursor-pointer transition-transform duration-500 hover:scale-105" onclick="navigateTo('hero')">
+                        <img src="https://i.imgur.com/htc01SE.png" alt="Bertuzzi Energy Logo" class="w-[200px] md:w-[280px] h-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]" />
+                    </div>
+                    <div class="w-[200px] md:w-[280px]"></div>
+                    <button onclick="navigateTo('form')" class="bg-blue-500 text-white px-8 py-3 rounded-full font-bold text-sm md:text-base shadow-lg shadow-blue-500/20 hover:bg-blue-600 hover:-translate-y-0.5 active:scale-95 transition-all min-w-[140px] md:min-w-[180px]">
+                        Inizia Ora
+                    </button>
                 </div>
-            </td>
-        </tr>
-    </table>
+            </nav>
+        `;
+    }
 
-    <div style="margin-top: 20px; padding: 15px; background: #eff6ff; border: 2px solid #2563eb; border-radius: 8px; text-align: center;">
-        <strong style="color: #2563eb; font-size: 16px;">
-            ✉ Inviare questo preventivo compilato e firmato a: info@bertuzzienergy.it
-        </strong>
-    </div>
+    function renderHero() {
+        return `
+            <section class="relative h-screen w-full overflow-hidden flex items-center justify-center">
+                <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline>
+                    <source src="https://solar.huawei.com/admin/asset/v1/pro/view/ce3e98aef3b241989f88726a4e507b2c.mp4" type="video/mp4" />
+                </video>
+                <div class="absolute inset-0 hero-overlay"></div>
+                
+                <div class="relative z-10 max-w-[1400px] w-full px-8 text-white">
+                    <div class="max-w-4xl">
+                        <h1 class="text-5xl md:text-7xl lg:text-8xl font-black leading-[1.1] mb-8 animate-fadeInDown">
+                            Energia Pulita, <br />
+                            <span class="text-blue-400">Futuro Intelligente.</span>
+                        </h1>
+                        <p class="text-lg md:text-xl lg:text-2xl text-slate-300 mb-12 max-w-2xl leading-relaxed opacity-90">
+                            Scopri il potenziale del tuo tetto con il nostro calcolatore avanzato. 
+                            Bertuzzi Energy trasforma il sole in risparmio immediato per la tua casa o azienda.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-6">
+                            <button onclick="navigateTo('form')" class="px-10 py-4 bg-blue-500 text-white rounded-full font-bold text-lg flex items-center justify-center gap-3 shadow-2xl shadow-blue-500/30 hover:bg-blue-600 hover:scale-105 transition-all">
+                                Inizia la Simulazione
+                                <svg class="w-6 h-6 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </button>
+                            <button onclick="window.open('https://www.bertuzzienergy.com/chi-siamo', '_blank')" class="px-10 py-4 bg-white/10 text-white border border-white/30 backdrop-blur-md rounded-full font-bold text-lg hover:bg-white/20 transition-all">
+                                Chi Siamo
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-    <div class="footer">
-        <strong>BERTUZZI ENERGY S.R.L.</strong><br>
-        Sede Operativa: Via Calamelli 14, 40026 Imola (BO)<br>
-        Sede Legale: Via Molino Rosso 9/C, 40026 Imola (BO)<br>
-        P.IVA/C.F./Registro Imprese: 03111391201<br>
-        Email: info@bertuzzienergy.it<br>
-        <br>
-        <em>Preventivo definitivo soggetto a conferma dopo sopralluogo tecnico.</em>
-    </div>
-</body>
-</html>
-    `;
+                <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
+                    <svg class="w-6 h-6 stroke-white stroke-2 fill-none" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+            </section>
+        `;
+    }
 
-    const preventivoWindow = window.open('', '_blank');
-    preventivoWindow.document.write(preventivoHTML);
-    preventivoWindow.document.close();
-}
-</script>
+    function renderForm() {
+        const currentRegions = formData.area ? REGIONI_PER_AREA[formData.area] : [];
+        const regionOptions = currentRegions.map(reg => `<option class="text-slate-900" value="${reg}" ${formData.regione === reg ? 'selected' : ''}>${reg}</option>`).join('');
+
+        return `
+            <section class="relative min-h-screen w-full flex flex-col items-center pt-24 md:pt-32 pb-12 px-4 md:px-8 overflow-x-hidden">
+                <video class="absolute inset-0 w-full h-full object-cover fixed" autoplay muted loop playsinline>
+                    <source src="https://solar.huawei.com/admin/asset/v1/pro/view/ce3e98aef3b241989f88726a4e507b2c.mp4" type="video/mp4" />
+                </video>
+                <div class="absolute inset-0 bg-black/50 backdrop-blur-[2px] fixed"></div>
+
+                <div class="absolute top-10 left-8 -translate-y-1/2 z-20 cursor-pointer transition-transform duration-500 hover:scale-105" onclick="navigateTo('hero')">
+                    <img src="https://i.imgur.com/htc01SE.png" alt="Bertuzzi Energy" class="w-[200px] md:w-[280px] h-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]" />
+                </div>
+
+                <div class="relative z-10 max-w-4xl w-full animate-fadeIn">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-2 tracking-tight">
+                            Configura il tuo <span class="text-blue-400">Impianto</span>
+                        </h2>
+                        <p class="text-xs md:text-sm text-blue-300 font-bold uppercase tracking-[0.4em] opacity-90">Personalizza la tua energia</p>
+                    </div>
+
+                    <div class="bg-white/10 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-12 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] border border-white/20">
+                        <form id="solarForm" class="space-y-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                                
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Tipologia Cliente</label>
+                                    <select name="tipoCliente" onchange="updateFormData(event)" class="bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white focus:border-blue-400 focus:bg-black/40 outline-none transition-all cursor-pointer appearance-none">
+                                        <option class="text-slate-900" value="privato" ${formData.tipoCliente === 'privato' ? 'selected' : ''}>Privato</option>
+                                        <option class="text-slate-900" value="azienda" ${formData.tipoCliente === 'azienda' ? 'selected' : ''}>Azienda</option>
+                                    </select>
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Area Geografica</label>
+                                    <select name="area" required onchange="updateFormData(event); updateRegions()" class="bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white focus:border-blue-400 focus:bg-black/40 outline-none transition-all cursor-pointer appearance-none">
+                                        <option class="text-slate-900" value="">Seleziona area</option>
+                                        <option class="text-slate-900" value="nord" ${formData.area === 'nord' ? 'selected' : ''}>Nord Italia</option>
+                                        <option class="text-slate-900" value="centro" ${formData.area === 'centro' ? 'selected' : ''}>Centro Italia</option>
+                                        <option class="text-slate-900" value="sud" ${formData.area === 'sud' ? 'selected' : ''}>Sud Italia e Isole</option>
+                                    </select>
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Regione</label>
+                                    <select name="regione" id="regioneSelect" required ${!formData.area ? 'disabled' : ''} onchange="updateFormData(event)" class="bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white focus:border-blue-400 focus:bg-black/40 outline-none transition-all disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer appearance-none">
+                                        <option class="text-slate-900" value="">Seleziona regione</option>
+                                        ${regionOptions}
+                                    </select>
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Consumo Annuo (kWh)</label>
+                                    <div class="relative">
+                                        <input type="number" name="consumo" value="${formData.consumo}" onchange="updateFormData(event)" placeholder="es. 3500" required class="w-full bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white placeholder:text-white/20 focus:border-blue-400 focus:bg-black/40 outline-none transition-all" />
+                                        <button type="button" onclick="openEstimateModal()" class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-widest text-blue-400 hover:text-white bg-blue-500/10 px-3 py-2 rounded-lg transition-all border border-blue-400/20">
+                                            AIUTO
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Profilo Consumi</label>
+                                    <select name="profiloConsumi" onchange="updateFormData(event)" class="bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white focus:border-blue-400 focus:bg-black/40 outline-none transition-all cursor-pointer appearance-none">
+                                        <option class="text-slate-900" value="diurno" ${formData.profiloConsumi === 'diurno' ? 'selected' : ''}>Diurno (Sempre a casa)</option>
+                                        <option class="text-slate-900" value="serale" ${formData.profiloConsumi === 'serale' ? 'selected' : ''}>Serale (Solo sera/notte)</option>
+                                    </select>
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Esposizione Tetto</label>
+                                    <select name="esposizione" onchange="updateFormData(event)" class="bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white focus:border-blue-400 focus:bg-black/40 outline-none transition-all cursor-pointer appearance-none">
+                                        <option class="text-slate-900" value="sud" ${formData.esposizione === 'sud' ? 'selected' : ''}>Sud (Ottimale)</option>
+                                        <option class="text-slate-900" value="est" ${formData.esposizione === 'est' ? 'selected' : ''}>Est</option>
+                                        <option class="text-slate-900" value="ovest" ${formData.esposizione === 'ovest' ? 'selected' : ''}>Ovest</option>
+                                        <option class="text-slate-900" value="nord" ${formData.esposizione === 'nord' ? 'selected' : ''}>Nord</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="pt-8 border-t border-white/10 flex flex-col sm:flex-row gap-4">
+                                <button type="button" onclick="navigateTo('hero')" class="flex-1 px-8 py-4 bg-white/5 text-blue-300 border border-white/10 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                                    Indietro
+                                </button>
+                                <button type="submit" class="flex-[2] px-8 py-4 bg-blue-500 text-white rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-xl shadow-blue-500/30 hover:bg-blue-600 hover:-translate-y-1 active:scale-95 transition-all">
+                                    Calcola Risparmio
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="estimateModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-blue-900/40 backdrop-blur-sm animate-fadeIn">
+                    <div class="absolute inset-0" onclick="closeEstimateModal()"></div>
+                    <div class="relative bg-white rounded-[2.5rem] p-10 max-w-lg w-full shadow-2xl animate-zoomIn95">
+                        <h3 class="text-2xl font-extrabold text-blue-600 mb-2">Stima il tuo consumo</h3>
+                        <p class="text-blue-400 font-medium mb-8">Seleziona il numero di persone in casa per una stima approssimativa del consumo annuo.</p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <button onclick="selectEstimate(2000)" class="p-6 bg-slate-50 border-2 border-blue-50 rounded-2xl text-center hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                                <p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2 group-hover:text-blue-500">1-2 Persone</p>
+                                <p class="text-2xl font-black text-blue-900">2000 <span class="text-sm text-blue-300">kWh</span></p>
+                            </button>
+                            <button onclick="selectEstimate(3500)" class="p-6 bg-slate-50 border-2 border-blue-50 rounded-2xl text-center hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                                <p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2 group-hover:text-blue-500">3-4 Persone</p>
+                                <p class="text-2xl font-black text-blue-900">3500 <span class="text-sm text-blue-300">kWh</span></p>
+                            </button>
+                            <button onclick="selectEstimate(5000)" class="p-6 bg-slate-50 border-2 border-blue-50 rounded-2xl text-center hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                                <p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2 group-hover:text-blue-500">5-6 Persone</p>
+                                <p class="text-2xl font-black text-blue-900">5000 <span class="text-sm text-blue-300">kWh</span></p>
+                            </button>
+                            <button onclick="selectEstimate(7000)" class="p-6 bg-slate-50 border-2 border-blue-50 rounded-2xl text-center hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                                <p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2 group-hover:text-blue-500">7+ Persone</p>
+                                <p class="text-2xl font-black text-blue-900">7000 <span class="text-sm text-blue-300">kWh</span></p>
+                            </button>
+                        </div>
+
+                        <button onclick="closeEstimateModal()" class="w-full py-4 bg-slate-100 text-blue-400 rounded-2xl font-bold hover:bg-blue-50 transition-all">
+                            Annulla
+                        </button>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderResults() {
+        const r = calculationResults;
+        if (!r) return '';
+
+        return `
+            <section class="relative min-h-screen py-16 md:py-24 px-4 md:px-8 flex flex-col items-center pt-32 md:pt-40 overflow-hidden">
+                <video class="absolute inset-0 w-full h-full object-cover fixed" autoplay muted loop playsinline>
+                    <source src="https://solar.huawei.com/admin/asset/v1/pro/view/ce3e98aef3b241989f88726a4e507b2c.mp4" type="video/mp4" />
+                </video>
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-[2px] fixed"></div>
+
+                <div class="absolute top-10 left-8 -translate-y-1/2 z-20 cursor-pointer transition-transform duration-500 hover:scale-105">
+                    <img src="https://i.imgur.com/htc01SE.png" alt="Bertuzzi Energy" class="w-[200px] md:w-[280px] h-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]" />
+                </div>
+
+                <div class="relative z-10 max-w-6xl w-full animate-fadeIn">
+                    <div class="bg-white/10 backdrop-blur-3xl rounded-[3rem] p-8 md:p-16 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.6)] border border-white/20">
+                        
+                        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10 mb-16">
+                            <div>
+                                <h2 class="text-5xl md:text-6xl font-black text-white leading-none mb-3">
+                                    Analisi <br />
+                                    <span class="text-blue-400">Smart.</span>
+                                </h2>
+                                <p class="text-blue-300 font-bold uppercase tracking-[0.3em] text-xs">Simulazione Energetica Avanzata</p>
+                            </div>
+                            <button onclick="generatePDF()" class="bg-blue-600 text-white px-10 py-5 rounded-full font-black uppercase tracking-widest text-[10px] flex items-center gap-4 shadow-2xl shadow-blue-600/40 hover:bg-blue-700 hover:-translate-y-1 active:scale-95 transition-all">
+                                Scarica Report PDF
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                            <div class="bg-blue-600/80 backdrop-blur-md rounded-[2rem] p-8 text-white shadow-xl hover:-translate-y-2 transition-all duration-500 border border-white/10">
+                                <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-5">Impianto</p>
+                                <h3 class="text-3xl font-black leading-tight">${r.nomeImpianto}</h3>
+                            </div>
+                            
+                            <div class="bg-blue-500/80 backdrop-blur-md rounded-[2rem] p-8 text-white shadow-xl hover:-translate-y-2 transition-all duration-500 border border-white/10">
+                                <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-5">Risparmio</p>
+                                <h3 class="text-3xl font-black leading-tight mb-2">€ ${r.risparmioTotaleAnnuo.toLocaleString()}</h3>
+                                <p class="text-base font-bold opacity-90 text-blue-100">all'anno</p>
+                            </div>
+
+                            <div class="bg-blue-400/80 backdrop-blur-md rounded-[2rem] p-8 text-white shadow-xl hover:-translate-y-2 transition-all duration-500 border border-white/10">
+                                <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-5">Ammortamento</p>
+                                <h3 class="text-3xl font-black leading-tight mb-2">${r.rientroInvestimento.toFixed(1)}</h3>
+                                <p class="text-base font-bold opacity-90 text-blue-100">Anni stimati</p>
+                            </div>
+
+                            <div class="bg-white/10 backdrop-blur-md rounded-[2rem] p-8 text-white shadow-xl hover:-translate-y-2 transition-all duration-500 border border-white/20">
+                                <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-70 mb-5">Produzione</p>
+                                <h3 class="text-3xl font-black leading-tight mb-2">${r.produzioneAnnua.toLocaleString()}</h3>
+                                <p class="text-base font-bold opacity-70 text-blue-200">kWh/anno</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/20 backdrop-blur-sm rounded-[2.5rem] p-8 md:p-12 mb-16 border border-white/10">
+                            <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 mb-10">Dettagli Impianto & Costi</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-12">
+                                <div class="space-y-1">
+                                    <p class="text-[9px] font-black text-blue-300 uppercase tracking-widest">Tecnologia</p>
+                                    <p class="text-xl font-black text-white">${r.nModuli} Moduli ${PARAMS.potenzaModulo}W</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-[9px] font-black text-blue-300 uppercase tracking-widest">Storage</p>
+                                    <p class="text-xl font-black text-white">${r.conStorage ? `${r.accumuloKWh} kWh` : 'Assente'}</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-[9px] font-black text-blue-300 uppercase tracking-widest">Efficienza</p>
+                                    <p class="text-xl font-black text-white">${r.percAutoconsumo}% Autoconsumo</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-[9px] font-black text-blue-300 uppercase tracking-widest">Ingombro</p>
+                                    <p class="text-xl font-black text-white">~ ${r.superficieMinima} m²</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Totale Ivato</p>
+                                    <p class="text-xl font-black text-blue-400">€ ${r.prezzoIVA.toLocaleString()}</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-[9px] font-black text-blue-300 uppercase tracking-widest">Incentivo 50%</p>
+                                    <p class="text-xl font-black text-white">€ ${r.detrazioneAnnuale.toLocaleString()} / anno</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-[9px] font-black text-blue-300 uppercase tracking-widest">Rata Findomestic</p>
+                                    <p class="text-xl font-black text-white">€ ${r.rataFindomestic.toFixed(2)} / mese</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Risparmio Netto</p>
+                                    <p class="text-xl font-black text-blue-400">€ ${r.risparmioConDetrazione.toLocaleString()} / anno</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-10 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-8">
+                            <button onclick="navigateTo('form')" class="group text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 hover:text-white flex items-center gap-3 transition-all">
+                                <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                                Modifica Dati
+                            </button>
+                            <button onclick="navigateTo('acceptance')" class="w-full sm:w-auto px-10 py-5 bg-green-500 text-white rounded-full font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-green-500/30 hover:bg-green-600 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+                                Accetta Preventivo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderAcceptance() {
+        const r = calculationResults;
+        if (!r) return '';
+
+        return `
+            <section class="relative min-h-screen py-16 md:py-24 px-4 md:px-8 flex flex-col items-center pt-32 md:pt-40 overflow-hidden">
+                <video class="absolute inset-0 w-full h-full object-cover fixed" autoplay muted loop playsinline>
+                    <source src="https://solar.huawei.com/admin/asset/v1/pro/view/ce3e98aef3b241989f88726a4e507b2c.mp4" type="video/mp4" />
+                </video>
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-[2px] fixed"></div>
+
+                <div class="absolute top-10 left-8 -translate-y-1/2 z-20 cursor-pointer transition-transform duration-500 hover:scale-105" onclick="navigateTo('hero')">
+                    <img src="https://i.imgur.com/htc01SE.png" alt="Bertuzzi Energy" class="w-[200px] md:w-[280px] h-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]" />
+                </div>
+
+                <div class="relative z-10 max-w-4xl w-full animate-fadeIn">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-2 tracking-tight">
+                            Accetta il <span class="text-green-400">Preventivo</span>
+                        </h2>
+                        <p class="text-xs md:text-sm text-green-300 font-bold uppercase tracking-[0.4em] opacity-90">Compila i tuoi dati per confermare</p>
+                    </div>
+
+                    <div class="bg-white/10 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-12 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] border border-white/20">
+                        
+                        <!-- Riepilogo Preventivo -->
+                        <div class="bg-green-500/20 border border-green-400/30 rounded-2xl p-6 mb-10">
+                            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-green-400 mb-4">Riepilogo Preventivo</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-white">
+                                <div>
+                                    <p class="text-[9px] font-bold text-green-300 uppercase">Impianto</p>
+                                    <p class="text-lg font-black">${r.nomeImpianto}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-green-300 uppercase">Potenza</p>
+                                    <p class="text-lg font-black">${r.kWp} kWp</p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-green-300 uppercase">Totale IVA incl.</p>
+                                    <p class="text-lg font-black text-green-400">€ ${r.prezzoIVA.toLocaleString()}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-green-300 uppercase">Risparmio/anno</p>
+                                    <p class="text-lg font-black">€ ${r.risparmioTotaleAnnuo.toLocaleString()}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form id="acceptanceForm" class="space-y-8">
+                            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 mb-6">I tuoi dati</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Nome *</label>
+                                    <input type="text" name="nome" value="${customerData.nome}" onchange="updateCustomerData(event)" required placeholder="Mario" class="w-full bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white placeholder:text-white/30 focus:border-green-400 focus:bg-black/40 outline-none transition-all" />
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Cognome *</label>
+                                    <input type="text" name="cognome" value="${customerData.cognome}" onchange="updateCustomerData(event)" required placeholder="Rossi" class="w-full bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white placeholder:text-white/30 focus:border-green-400 focus:bg-black/40 outline-none transition-all" />
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Email *</label>
+                                    <input type="email" name="email" value="${customerData.email}" onchange="updateCustomerData(event)" required placeholder="mario.rossi@email.com" class="w-full bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white placeholder:text-white/30 focus:border-green-400 focus:bg-black/40 outline-none transition-all" />
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Telefono *</label>
+                                    <input type="tel" name="telefono" value="${customerData.telefono}" onchange="updateCustomerData(event)" required placeholder="+39 333 1234567" class="w-full bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white placeholder:text-white/30 focus:border-green-400 focus:bg-black/40 outline-none transition-all" />
+                                </div>
+
+                                <div class="flex flex-col gap-2 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Indirizzo Installazione *</label>
+                                    <input type="text" name="indirizzo" value="${customerData.indirizzo}" onchange="updateCustomerData(event)" required placeholder="Via Roma 123" class="w-full bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white placeholder:text-white/30 focus:border-green-400 focus:bg-black/40 outline-none transition-all" />
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">Città *</label>
+                                    <input type="text" name="citta" value="${customerData.citta}" onchange="updateCustomerData(event)" required placeholder="Milano" class="w-full bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white placeholder:text-white/30 focus:border-green-400 focus:bg-black/40 outline-none transition-all" />
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 ml-1">CAP *</label>
+                                    <input type="text" name="cap" value="${customerData.cap}" onchange="updateCustomerData(event)" required placeholder="20100" class="w-full bg-black/20 border border-white/20 rounded-xl p-4 font-bold text-white placeholder:text-white/30 focus:border-green-400 focus:bg-black/40 outline-none transition-all" />
+                                </div>
+                            </div>
+
+                            <!-- Checkbox Accettazione -->
+                            <div class="pt-8 border-t border-white/10">
+                                <label class="flex items-start gap-4 cursor-pointer group">
+                                    <input type="checkbox" name="accettato" id="accettazioneCheckbox" onchange="updateCustomerData(event)" class="mt-1 w-6 h-6 rounded-lg border-2 border-white/30 bg-transparent checked:bg-green-500 checked:border-green-500 cursor-pointer transition-all" required />
+                                    <span class="text-sm text-white/80 leading-relaxed group-hover:text-white transition-all">
+                                        Dichiaro di aver preso visione del preventivo e di accettare le condizioni proposte. 
+                                        Autorizzo Bertuzzi Energy a contattarmi per procedere con il sopralluogo e l'installazione dell'impianto fotovoltaico.
+                                        <span class="text-green-400 font-bold">*</span>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="pt-8 flex flex-col sm:flex-row gap-4">
+                                <button type="button" onclick="navigateTo('results')" class="flex-1 px-8 py-4 bg-white/5 text-blue-300 border border-white/10 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                                    Torna al Preventivo
+                                </button>
+                                <button type="submit" class="flex-[2] px-8 py-5 bg-green-500 text-white rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-xl shadow-green-500/30 hover:bg-green-600 hover:-translate-y-1 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+                                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                                    Invia Accettazione
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderFooter() {
+        return `
+            <footer class="bg-[#1e3a5f] text-white pt-16 pb-12">
+                <div class="max-w-[1400px] mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="space-y-6">
+                        <h3 class="text-base font-black tracking-widest uppercase">Bertuzzi Energy</h3>
+                        <p class="text-sm text-slate-300 leading-relaxed max-w-xs">
+                            Bertuzzi Energy è un'azienda leader nel settore delle soluzioni energetiche e di sicurezza.
+                        </p>
+                        <p class="text-sm font-bold text-slate-400">P.I. IT03111391201</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <h3 class="text-base font-black tracking-widest uppercase">Contatti</h3>
+                        <div class="text-sm text-slate-300 space-y-2">
+                            <p>Via Molino Rosso 9<br />IMOLA (BO) 40026</p>
+                            <p>Tel: 0542-367063<br />Tel: 0542-367064</p>
+                            <p>Email: info@bertuzzienergy.it</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <h3 class="text-base font-black tracking-widest uppercase">Legal</h3>
+                        <div class="flex flex-col gap-3">
+                            <a href="#" class="text-sm text-slate-300 hover:text-white hover:underline transition-all">Terms & Conditions</a>
+                            <a href="#" class="text-sm text-slate-300 hover:text-white hover:underline transition-all">Privacy Policy</a>
+                            <a href="#" class="text-sm text-slate-300 hover:text-white hover:underline transition-all">Cookie Policy</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="max-w-[1400px] mx-auto px-8 mt-16 pt-8 border-t border-white/10 text-center text-xs text-slate-400">
+                    &copy; ${new Date().getFullYear()} Bertuzzi Energy S.R.L. Tutti i diritti riservati.
+                </div>
+            </footer>
+        `;
+    }
+
+    // ==================== APP FUNCTIONS ====================
+    function navigateTo(section) {
+        currentSection = section;
+        render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateFormData(event) {
+        const { name, value } = event.target;
+        formData[name] = name === 'consumo' ? Number(value) : value;
+    }
+
+    function updateCustomerData(event) {
+        const { name, value, type, checked } = event.target;
+        customerData[name] = type === 'checkbox' ? checked : value;
+    }
+
+    function updateRegions() {
+        formData.regione = '';
+        render();
+    }
+
+    function openEstimateModal() {
+        document.getElementById('estimateModal').classList.remove('hidden');
+    }
+
+    function closeEstimateModal() {
+        document.getElementById('estimateModal').classList.add('hidden');
+    }
+
+    function selectEstimate(value) {
+        formData.consumo = value;
+        closeEstimateModal();
+        render();
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        if (!formData.area || !formData.regione || !formData.consumo) {
+            alert('Completa tutti i campi obbligatori');
+            return;
+        }
+        calculationResults = calculateSolar(formData);
+        navigateTo('results');
+    }
+
+    function handleAcceptanceSubmit(e) {
+        e.preventDefault();
+        
+        if (!customerData.accettato) {
+            alert('Devi accettare le condizioni per procedere');
+            return;
+        }
+
+        const r = calculationResults;
+        const c = customerData;
+        const today = new Date().toLocaleDateString('it-IT');
+
+        // Costruisci il corpo dell'email
+        const subject = encodeURIComponent(`Accettazione Preventivo Fotovoltaico - ${c.nome} ${c.cognome}`);
+        
+        const body = encodeURIComponent(`
+ACCETTAZIONE PREVENTIVO FOTOVOLTAICO
+=====================================
+Data: ${today}
+
+DATI CLIENTE
+------------
+Nome: ${c.nome} ${c.cognome}
+Email: ${c.email}
+Telefono: ${c.telefono}
+Indirizzo: ${c.indirizzo}
+Città: ${c.citta}
+CAP: ${c.cap}
+Regione: ${r.regione}
+
+DETTAGLI IMPIANTO
+-----------------
+Tipologia: ${r.tipoCliente === 'privato' ? 'Privato' : 'Azienda'}
+Impianto: ${r.nomeImpianto}
+Potenza: ${r.kWp} kWp
+Moduli: ${r.nModuli} x ${PARAMS.potenzaModulo}W
+Storage: ${r.conStorage ? r.accumuloKWh + ' kWh' : 'Non incluso'}
+Esposizione: ${r.esposizione.toUpperCase()}
+Superficie richiesta: ~${r.superficieMinima} m²
+
+ANALISI ECONOMICA
+-----------------
+Consumo annuo dichiarato: ${r.consumo.toLocaleString()} kWh
+Produzione stimata: ${r.produzioneAnnua.toLocaleString()} kWh/anno
+Autoconsumo: ${r.percAutoconsumo}%
+Risparmio annuo: € ${r.risparmioTotaleAnnuo.toLocaleString()}
+Detrazione 50%: € ${r.detrazioneAnnuale.toLocaleString()}/anno
+Rientro investimento: ${r.rientroInvestimento.toFixed(1)} anni
+
+PREZZO
+------
+Totale (IVA inclusa): € ${r.prezzoIVA.toLocaleString()}
+Rata Findomestic: € ${r.rataFindomestic.toFixed(2)}/mese
+
+=====================================
+Il cliente ha accettato il preventivo e autorizza il contatto per il sopralluogo.
+        `.trim());
+
+        // Apri mailto
+        window.location.href = `mailto:info@bertuzzienergy.it?subject=${subject}&body=${body}`;
+        
+        // Mostra conferma
+        setTimeout(() => {
+            alert('Grazie per aver accettato il preventivo!\n\nSi aprirà il tuo client email per inviare la conferma a Bertuzzi Energy.\n\nVerrai ricontattato al più presto per fissare il sopralluogo.');
+        }, 500);
+    }
+
+    // ==================== PDF GENERATION ====================
+    async function generatePDF() {
+        const r = calculationResults;
+        const today = new Date().toLocaleDateString('it-IT');
+        const refNumber = `PV-${Date.now().toString().slice(-6)}`;
+        
+        // URL immagini prodotto
+        const inverterImg = 'https://i.imgur.com/ADdp7Pc.png';
+        const storageImg = 'https://i.imgur.com/X5zdKSU.png';
+        
+        // Crea il template HTML per il PDF
+        const pdfTemplate = document.createElement('div');
+        pdfTemplate.id = 'pdf-template';
+        pdfTemplate.style.cssText = 'position: fixed; left: -9999px; top: 0; width: 800px; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%); font-family: Inter, sans-serif; padding: 0; box-sizing: border-box;';
+        
+        // Sezione prodotti dinamica
+        const productSection = r.conStorage ? `
+            <!-- Sezione Prodotti - Con Storage -->
+            <div style="background: rgba(255,255,255,0.03); border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.08);">
+                <p style="color: #60a5fa; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; margin: 0 0 20px 0; text-align: center;">Componenti del tuo impianto</p>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 40px;">
+                    <div style="text-align: center;">
+                        <div style="background: linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.05) 100%); border-radius: 16px; padding: 20px; border: 1px solid rgba(59,130,246,0.2); margin-bottom: 12px;">
+                            <img src="${inverterImg}" style="width: 140px; height: auto; display: block;" crossorigin="anonymous" />
+                        </div>
+                        <p style="color: white; font-size: 13px; font-weight: 700; margin: 0 0 4px 0;">Inverter Huawei</p>
+                        <p style="color: #93c5fd; font-size: 11px; margin: 0;">${r.nomeImpianto}</p>
+                    </div>
+                    <div style="color: #3b82f6; font-size: 28px; font-weight: 300;">+</div>
+                    <div style="text-align: center;">
+                        <div style="background: linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(34,197,94,0.05) 100%); border-radius: 16px; padding: 20px; border: 1px solid rgba(34,197,94,0.2); margin-bottom: 12px;">
+                            <img src="${storageImg}" style="width: 140px; height: auto; display: block;" crossorigin="anonymous" />
+                        </div>
+                        <p style="color: white; font-size: 13px; font-weight: 700; margin: 0 0 4px 0;">Batteria Storage</p>
+                        <p style="color: #86efac; font-size: 11px; margin: 0;">${r.accumuloKWh} kWh</p>
+                    </div>
+                </div>
+            </div>
+        ` : `
+            <!-- Sezione Prodotti - Solo Inverter -->
+            <div style="background: rgba(255,255,255,0.03); border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.08);">
+                <p style="color: #60a5fa; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; margin: 0 0 20px 0; text-align: center;">Componente principale</p>
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <div style="text-align: center;">
+                        <div style="background: linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.05) 100%); border-radius: 16px; padding: 25px; border: 1px solid rgba(59,130,246,0.2); margin-bottom: 12px;">
+                            <img src="${inverterImg}" style="width: 180px; height: auto; display: block;" crossorigin="anonymous" />
+                        </div>
+                        <p style="color: white; font-size: 14px; font-weight: 700; margin: 0 0 4px 0;">Inverter Huawei</p>
+                        <p style="color: #93c5fd; font-size: 12px; margin: 0;">${r.nomeImpianto}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        pdfTemplate.innerHTML = `
+            <!-- Logo centrato in alto -->
+            <div style="padding: 5px 30px 0 30px; text-align: center;">
+                <img src="https://i.imgur.com/htc01SE.png" style="width: 280px; height: auto; display: inline-block;" crossorigin="anonymous" />
+            </div>
+            
+            <div style="padding: 8px 30px 30px 30px;">
+                <!-- Header con titolo e riferimento -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div>
+                        <h1 style="color: white; font-size: 26px; font-weight: 900; margin: 0 0 5px 0;">Preventivo Impianto Fotovoltaico</h1>
+                        <p style="color: rgba(147,197,253,0.8); font-size: 12px; margin: 0;">Simulazione personalizzata per ${r.regione}</p>
+                    </div>
+                    <div style="text-align: right; background: rgba(59,130,246,0.1); padding: 12px 18px; border-radius: 12px; border: 1px solid rgba(59,130,246,0.2);">
+                        <p style="color: #93c5fd; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 3px 0;">Riferimento</p>
+                        <p style="color: white; font-size: 14px; font-weight: 800; margin: 0;">${refNumber}</p>
+                        <p style="color: rgba(147,197,253,0.6); font-size: 10px; margin: 5px 0 0 0;">${today}</p>
+                    </div>
+                </div>
+
+                <!-- Cards principali -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+                    <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 16px; padding: 20px; text-align: center;">
+                        <p style="color: rgba(255,255,255,0.7); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px 0;">Impianto</p>
+                        <p style="color: white; font-size: 20px; font-weight: 900; margin: 0;">${r.nomeImpianto}</p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%); border-radius: 16px; padding: 20px; text-align: center;">
+                        <p style="color: rgba(255,255,255,0.7); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px 0;">Risparmio</p>
+                        <p style="color: white; font-size: 20px; font-weight: 900; margin: 0;">€ ${r.risparmioTotaleAnnuo.toLocaleString()}</p>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 10px; margin: 4px 0 0 0;">all'anno</p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); border-radius: 16px; padding: 20px; text-align: center;">
+                        <p style="color: rgba(255,255,255,0.7); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px 0;">Ammortamento</p>
+                        <p style="color: white; font-size: 20px; font-weight: 900; margin: 0;">${r.rientroInvestimento.toFixed(1)}</p>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 10px; margin: 4px 0 0 0;">anni</p>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
+                        <p style="color: rgba(255,255,255,0.5); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px 0;">Produzione</p>
+                        <p style="color: white; font-size: 20px; font-weight: 900; margin: 0;">${r.produzioneAnnua.toLocaleString()}</p>
+                        <p style="color: rgba(255,255,255,0.5); font-size: 10px; margin: 4px 0 0 0;">kWh/anno</p>
+                    </div>
+                </div>
+
+                ${productSection}
+
+                <!-- Sezione Prezzo -->
+                <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 20px; padding: 25px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 4px 0;">A partire da</p>
+                        <p style="color: white; font-size: 36px; font-weight: 900; margin: 0; line-height: 1;">€ ${r.rataFindomestic.toFixed(2)} <span style="font-size: 16px; font-weight: 400;">/mese</span></p>
+                        <p style="color: rgba(255,255,255,0.5); font-size: 9px; margin: 6px 0 0 0;">Finanziamento Findomestic 84 mesi</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="color: rgba(255,255,255,0.7); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 4px 0;">Prezzo totale</p>
+                        <p style="color: white; font-size: 28px; font-weight: 900; margin: 0;">€ ${r.prezzoIVA.toLocaleString()}</p>
+                        <p style="color: rgba(255,255,255,0.5); font-size: 10px; margin: 4px 0 0 0;">IVA ${r.tipoCliente === 'privato' ? '10%' : '22%'} inclusa</p>
+                    </div>
+                </div>
+
+                <!-- Dettagli Tecnici -->
+                <div style="background: rgba(0,0,0,0.3); border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                    <p style="color: #60a5fa; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; margin: 0 0 15px 0;">Specifiche Tecniche & Economiche</p>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                        <div>
+                            <p style="color: #93c5fd; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px 0;">Tecnologia</p>
+                            <p style="color: white; font-size: 13px; font-weight: 800; margin: 0;">${r.nModuli} Moduli ${PARAMS.potenzaModulo}W</p>
+                        </div>
+                        <div>
+                            <p style="color: #93c5fd; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px 0;">Storage</p>
+                            <p style="color: white; font-size: 13px; font-weight: 800; margin: 0;">${r.conStorage ? r.accumuloKWh + ' kWh' : 'Non incluso'}</p>
+                        </div>
+                        <div>
+                            <p style="color: #93c5fd; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px 0;">Autoconsumo</p>
+                            <p style="color: white; font-size: 13px; font-weight: 800; margin: 0;">${r.percAutoconsumo}%</p>
+                        </div>
+                        <div>
+                            <p style="color: #93c5fd; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px 0;">Superficie</p>
+                            <p style="color: white; font-size: 13px; font-weight: 800; margin: 0;">~ ${r.superficieMinima} m²</p>
+                        </div>
+                        <div>
+                            <p style="color: #60a5fa; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px 0;">Potenza</p>
+                            <p style="color: #60a5fa; font-size: 13px; font-weight: 800; margin: 0;">${r.kWp} kWp</p>
+                        </div>
+                        <div>
+                            <p style="color: #93c5fd; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px 0;">Detrazione 50%</p>
+                            <p style="color: white; font-size: 13px; font-weight: 800; margin: 0;">€ ${r.detrazioneAnnuale.toLocaleString()}/anno</p>
+                        </div>
+                        <div>
+                            <p style="color: #93c5fd; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px 0;">Esposizione</p>
+                            <p style="color: white; font-size: 13px; font-weight: 800; margin: 0;">${r.esposizione.charAt(0).toUpperCase() + r.esposizione.slice(1)}</p>
+                        </div>
+                        <div>
+                            <p style="color: #60a5fa; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px 0;">Risparmio Netto</p>
+                            <p style="color: #60a5fa; font-size: 13px; font-weight: 800; margin: 0;">€ ${r.risparmioConDetrazione.toLocaleString()}/anno</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Note -->
+                <div style="margin-bottom: 15px; padding: 12px 15px; background: rgba(255,255,255,0.02); border-radius: 10px; border-left: 3px solid #3b82f6;">
+                    <p style="color: rgba(148,163,184,0.8); font-size: 8px; margin: 0 0 2px 0;">* I valori di produzione sono stime basate su dati medi della zona geografica selezionata.</p>
+                    <p style="color: rgba(148,163,184,0.8); font-size: 8px; margin: 0 0 2px 0;">* La detrazione fiscale del 50% è ripartita in 10 anni come da normativa vigente.</p>
+                    <p style="color: rgba(148,163,184,0.8); font-size: 8px; margin: 0;">* Questo preventivo ha validità 30 giorni dalla data di emissione.</p>
+                </div>
+
+                <!-- Footer -->
+                <div style="background: #1e3a5f; border-radius: 14px; padding: 18px; text-align: center;">
+                    <p style="color: white; font-size: 13px; font-weight: 800; margin: 0 0 6px 0;">BERTUZZI ENERGY S.R.L.</p>
+                    <p style="color: rgba(255,255,255,0.7); font-size: 9px; margin: 0 0 2px 0;">Via Molino Rosso 9, 40026 IMOLA (BO) | P.IVA IT03111391201</p>
+                    <p style="color: rgba(255,255,255,0.7); font-size: 9px; margin: 0 0 2px 0;">Tel: 0542-367063 / 0542-367064 | Email: info@bertuzzienergy.it</p>
+                    <p style="color: #60a5fa; font-size: 10px; font-weight: 600; margin: 0;">www.bertuzzienergy.it</p>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(pdfTemplate);
+        
+        // Attendi che le immagini siano caricate
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        try {
+            // Cattura il template con html2canvas
+            const canvas = await html2canvas(pdfTemplate, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#0f172a',
+                logging: false
+            });
+            
+            // Crea il PDF
+            const { jsPDF } = window.jspdf;
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const imgWidth = canvas.width;
+            const imgHeight = canvas.height;
+            const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+            const imgX = (pdfWidth - imgWidth * ratio) / 2;
+            const imgY = 0;
+            
+            pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+            pdf.save(`Preventivo_Bertuzzi_${r.nomeImpianto.replace(/\s/g, '_')}.pdf`);
+            
+        } catch (error) {
+            console.error('Errore generazione PDF:', error);
+            alert('Errore nella generazione del PDF. Riprova.');
+        } finally {
+            // Rimuovi il template
+            document.body.removeChild(pdfTemplate);
+        }
+    }
+
+    // ==================== MAIN RENDER ====================
+    function render() {
+        const root = document.getElementById('root');
+        let content = '';
+
+        content += renderNavbar();
+
+        if (currentSection === 'hero') {
+            content += renderHero();
+        } else if (currentSection === 'form') {
+            content += renderForm();
+        } else if (currentSection === 'results') {
+            content += renderResults();
+        } else if (currentSection === 'acceptance') {
+            content += renderAcceptance();
+        }
+
+        content += renderFooter();
+
+        root.innerHTML = content;
+
+        // Attach form submit handlers
+        const solarForm = document.getElementById('solarForm');
+        if (solarForm) {
+            solarForm.addEventListener('submit', handleFormSubmit);
+        }
+        
+        const acceptanceForm = document.getElementById('acceptanceForm');
+        if (acceptanceForm) {
+            acceptanceForm.addEventListener('submit', handleAcceptanceSubmit);
+        }
+    }
+
+    // ==================== INIT ====================
+    document.addEventListener('DOMContentLoaded', render);
+    </script>
 </body>
 </html>
